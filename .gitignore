@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+*.egg
+.eggs/
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# SQLite database (optional: remove if you want to track the DB)
+calorie_tracker.db
+
+# Streamlit
+.streamlit/secrets.toml
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
