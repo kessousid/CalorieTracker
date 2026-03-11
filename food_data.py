@@ -231,6 +231,20 @@ FOOD_DATABASE = {
     "Capsicum Rice": {"calories": 235, "unit": "cup", "category": "Rice & Grains"},
     "Palak Rice": {"calories": 230, "unit": "cup", "category": "Rice & Grains"},
     "Egg Biryani": {"calories": 360, "unit": "cup", "category": "Rice & Grains"},
+    # ── Rice combinations (mixed/mashed together as eaten) ─────────────────
+    "Sambar Rice (Sambhar Sadam)": {"calories": 250, "unit": "cup", "category": "Rice & Grains"},
+    "Rasam Rice (Rasam Sadam)": {"calories": 190, "unit": "cup", "category": "Rice & Grains"},
+    "Paruppu Sadam (Dal Rice - TN style)": {"calories": 225, "unit": "cup", "category": "Rice & Grains"},
+    "Dal Chawal (mixed, North Indian)": {"calories": 220, "unit": "cup", "category": "Rice & Grains"},
+    "Mor Sadam (Buttermilk Rice)": {"calories": 155, "unit": "cup", "category": "Rice & Grains"},
+    "Ghee Rice (plain rice + ghee)": {"calories": 260, "unit": "cup", "category": "Rice & Grains"},
+    "Rice with Ghee & Pickle": {"calories": 255, "unit": "plate", "category": "Rice & Grains"},
+    "Rice with Papad & Pickle": {"calories": 230, "unit": "plate", "category": "Rice & Grains"},
+    "Koozh (Fermented Rice/Millet Porridge - TN)": {"calories": 150, "unit": "cup", "category": "Rice & Grains"},
+    "Arisi Kanji (Plain Rice Gruel)": {"calories": 100, "unit": "cup", "category": "Rice & Grains"},
+    "Arisi Thanni Kanji (Rice Water Gruel)": {"calories": 40, "unit": "cup", "category": "Rice & Grains"},
+    "Kanji with Coconut Milk": {"calories": 175, "unit": "cup", "category": "Rice & Grains"},
+    "Ambali (Ragi Fermented Kanji)": {"calories": 130, "unit": "cup", "category": "Rice & Grains"},
 
     # ─── BREADS ───────────────────────────────────────────────────────────
     "Roti / Chapati": {"calories": 120, "unit": "piece", "category": "Breads"},
@@ -282,6 +296,15 @@ FOOD_DATABASE = {
     "Mysore Rasam": {"calories": 60, "unit": "cup", "category": "Dal & Lentils"},
     "Tomato Rasam": {"calories": 55, "unit": "cup", "category": "Dal & Lentils"},
     "Pepper Rasam": {"calories": 45, "unit": "cup", "category": "Dal & Lentils"},
+    "Jeera Rasam": {"calories": 45, "unit": "cup", "category": "Dal & Lentils"},
+    "Garlic Rasam": {"calories": 50, "unit": "cup", "category": "Dal & Lentils"},
+    # ── Dal water / thin liquids ────────────────────────────────────────────
+    "Dal Water / Paruppu Thanni (Toor Dal)": {"calories": 30, "unit": "cup", "category": "Dal & Lentils"},
+    "Moong Dal Water (thin boiled liquid)": {"calories": 25, "unit": "cup", "category": "Dal & Lentils"},
+    "Masoor Dal Water (thin boiled liquid)": {"calories": 30, "unit": "cup", "category": "Dal & Lentils"},
+    "Chana Dal Water": {"calories": 35, "unit": "cup", "category": "Dal & Lentils"},
+    "Rice Water / Ganji Water (starchy)": {"calories": 20, "unit": "cup", "category": "Dal & Lentils"},
+    "Sambar Water (thin, no vegetables)": {"calories": 40, "unit": "cup", "category": "Dal & Lentils"},
 
     # ─── VEGETABLE CURRIES ────────────────────────────────────────────────
     "Aloo Sabzi": {"calories": 200, "unit": "cup", "category": "Vegetable Curries"},
@@ -487,6 +510,56 @@ FOOD_DATABASE = {
     "Pithe (Rice Dumpling)": {"calories": 140, "unit": "piece", "category": "Regional - East India"},
     "Puri Sabzi (Odisha style)": {"calories": 350, "unit": "serving", "category": "Regional - East India"},
     "Dalma with Rice": {"calories": 400, "unit": "plate", "category": "Regional - East India"},
+
+    # ─── MEAL COMBINATIONS ────────────────────────────────────────────────
+    # Calories represent the full combination as typically eaten together
+    # South Indian breakfast combos
+    "Idli with Sambar (2 idli + sambar)": {"calories": 290, "unit": "serving", "category": "Meal Combinations"},
+    "Idli with Coconut Chutney (2 idli + chutney)": {"calories": 220, "unit": "serving", "category": "Meal Combinations"},
+    "Idli with Sambar & Chutney (2 idli)": {"calories": 340, "unit": "serving", "category": "Meal Combinations"},
+    "Medu Vada with Sambar (2 vada)": {"calories": 430, "unit": "serving", "category": "Meal Combinations"},
+    "Medu Vada with Coconut Chutney (2 vada)": {"calories": 380, "unit": "serving", "category": "Meal Combinations"},
+    "Idli Vada Combo (2 idli + 1 vada + sambar)": {"calories": 440, "unit": "serving", "category": "Meal Combinations"},
+    "Dosa with Sambar": {"calories": 280, "unit": "serving", "category": "Meal Combinations"},
+    "Dosa with Coconut Chutney": {"calories": 230, "unit": "serving", "category": "Meal Combinations"},
+    "Masala Dosa with Sambar & Chutney": {"calories": 430, "unit": "serving", "category": "Meal Combinations"},
+    "Pongal with Sambar & Chutney": {"calories": 430, "unit": "serving", "category": "Meal Combinations"},
+    "Uttapam with Sambar & Chutney": {"calories": 330, "unit": "serving", "category": "Meal Combinations"},
+    "Appam with Coconut Milk": {"calories": 280, "unit": "serving (2 appam)", "category": "Meal Combinations"},
+    "Appam with Vegetable Stew": {"calories": 300, "unit": "serving (2 appam)", "category": "Meal Combinations"},
+    "Puttu with Kadala Curry": {"calories": 380, "unit": "serving", "category": "Meal Combinations"},
+    "Idiyappam with Coconut Milk": {"calories": 200, "unit": "serving", "category": "Meal Combinations"},
+    "Idiyappam with Veg Stew": {"calories": 220, "unit": "serving", "category": "Meal Combinations"},
+    # South Indian rice meals
+    "Sambar Rice with Ghee (full plate)": {"calories": 290, "unit": "plate (1.5 cup)", "category": "Meal Combinations"},
+    "Rasam Rice with Papad (full plate)": {"calories": 240, "unit": "plate (1.5 cup)", "category": "Meal Combinations"},
+    "Dal Rice with Ghee (full plate)": {"calories": 310, "unit": "plate (1.5 cup)", "category": "Meal Combinations"},
+    "Curd Rice with Pickle (full plate)": {"calories": 260, "unit": "plate (1.5 cup)", "category": "Meal Combinations"},
+    "Rice Sambar Rasam Curd (full meal)": {"calories": 550, "unit": "full plate", "category": "Meal Combinations"},
+    "South Indian Thali (full)": {"calories": 700, "unit": "thali", "category": "Meal Combinations"},
+    "Kerala Sadya (full banana leaf)": {"calories": 800, "unit": "sadya", "category": "Meal Combinations"},
+    # North Indian meal combos
+    "Dal Chawal (full plate)": {"calories": 420, "unit": "plate", "category": "Meal Combinations"},
+    "Rajma Chawal (full plate)": {"calories": 480, "unit": "plate", "category": "Meal Combinations"},
+    "Chole Chawal (full plate)": {"calories": 490, "unit": "plate", "category": "Meal Combinations"},
+    "Roti with Dal (2 roti + 1 cup dal)": {"calories": 390, "unit": "serving", "category": "Meal Combinations"},
+    "Roti with Sabzi (2 roti + 1 cup sabzi)": {"calories": 390, "unit": "serving", "category": "Meal Combinations"},
+    "Roti with Paneer Curry (2 roti + curry)": {"calories": 560, "unit": "serving", "category": "Meal Combinations"},
+    "Roti with Curd (2 roti + curd)": {"calories": 300, "unit": "serving", "category": "Meal Combinations"},
+    "Paratha with Curd (2 paratha + curd)": {"calories": 460, "unit": "serving", "category": "Meal Combinations"},
+    "Paratha with Pickle & Butter (2 paratha)": {"calories": 490, "unit": "serving", "category": "Meal Combinations"},
+    "Puri Bhaji (2 puri + aloo bhaji)": {"calories": 500, "unit": "plate", "category": "Meal Combinations"},
+    "Dal Baati (2 baati + dal + churma)": {"calories": 700, "unit": "serving", "category": "Meal Combinations"},
+    "Makki Roti with Sarson Saag & Butter": {"calories": 370, "unit": "serving (2 roti)", "category": "Meal Combinations"},
+    "North Indian Thali (full)": {"calories": 850, "unit": "thali", "category": "Meal Combinations"},
+    # Breakfast combos
+    "Poha with Chai": {"calories": 300, "unit": "serving", "category": "Meal Combinations"},
+    "Upma with Coconut Chutney": {"calories": 290, "unit": "serving", "category": "Meal Combinations"},
+    "Bread Butter & Jam (2 slices)": {"calories": 220, "unit": "serving", "category": "Meal Combinations"},
+    "Bread Omelette (2 bread + 2 egg omelette)": {"calories": 460, "unit": "serving", "category": "Meal Combinations"},
+    "Egg Toast (2 slices + egg)": {"calories": 340, "unit": "serving", "category": "Meal Combinations"},
+    "Sabudana Khichdi with Curd": {"calories": 430, "unit": "serving", "category": "Meal Combinations"},
+    "Poori with Halwa & Chana (Punjabi Prasad)": {"calories": 600, "unit": "serving", "category": "Meal Combinations"},
 
     # ─── MODERN & FAST FOOD ───────────────────────────────────────────────
     # Burgers & Sandwiches
