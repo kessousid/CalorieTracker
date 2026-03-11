@@ -9,7 +9,7 @@ os.makedirs(_DATA_DIR, exist_ok=True)
 DB_PATH = os.path.join(_DATA_DIR, "calorie_tracker.db")
 
 # Schema version: bump when tables change incompatibly
-SCHEMA_VERSION = 3
+SCHEMA_VERSION = 4
 
 
 def get_connection():
@@ -60,6 +60,21 @@ def _migrate(conn, from_version: int):
         )
     """)
 
+    if from_version < 4:
+        # Add health profile columns non-destructively
+        for col_def in [
+            "age INTEGER",
+            "weight_kg REAL",
+            "height_cm REAL",
+            "sex TEXT",
+            "activity_level TEXT",
+            "calorie_need INTEGER",
+        ]:
+            try:
+                conn.execute(f"ALTER TABLE users ADD COLUMN {col_def}")
+            except Exception:
+                pass  # column already exists
+
     conn.execute("""
         CREATE TABLE IF NOT EXISTS daily_settings (
             user_id INTEGER NOT NULL,
@@ -105,16 +120,23 @@ def _verify_password(password: str, stored_hash: str, salt: str) -> bool:
 # ─── User auth ────────────────────────────────────────────────────────────────
 
 def register_user(name: str, username: str, email: str,
-                  password: str, default_target: int = 2000) -> tuple[bool, str]:
+                  password: str, default_target: int = 2000,
+                  age: int | None = None, weight_kg: float | None = None,
+                  height_cm: float | None = None, sex: str | None = None,
+                  activity_level: str | None = None,
+                  calorie_need: int | None = None) -> tuple[bool, str]:
     """Returns (success, message)."""
     pw_hash, salt = _hash_password(password)
     try:
         with get_connection() as conn:
             conn.execute("""
-                INSERT INTO users (name, username, email, password_hash, salt, default_target)
-                VALUES (?, ?, ?, ?, ?, ?)
+                INSERT INTO users
+                    (name, username, email, password_hash, salt, default_target,
+                     age, weight_kg, height_cm, sex, activity_level, calorie_need)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (name.strip(), username.strip(), email.strip().lower(),
-                  pw_hash, salt, default_target))
+                  pw_hash, salt, default_target,
+                  age, weight_kg, height_cm, sex, activity_level, calorie_need))
             conn.commit()
         return True, "Account created successfully."
     except sqlite3.IntegrityError as e:

@@ -86,6 +86,14 @@ def show_auth_page() -> dict | None:
 
         # ── Register ──────────────────────────────────────────────────────────
         with tab_register:
+            _ACTIVITY_OPTIONS = {
+                "Sedentary (little or no exercise)": 1.2,
+                "Lightly active (1–3 days/week)": 1.375,
+                "Moderately active (3–5 days/week)": 1.55,
+                "Active (6–7 days/week)": 1.725,
+            }
+
+            st.markdown("**Account Details**")
             with st.form("register_form", clear_on_submit=False):
                 name = st.text_input("Full Name", placeholder="Priya Sharma")
                 col_u, col_e = st.columns(2)
@@ -98,11 +106,37 @@ def show_auth_page() -> dict | None:
                 confirm_r = col_c.text_input(
                     "Confirm Password", type="password", placeholder="Same as above"
                 )
-                target_r = st.slider(
-                    "Daily Calorie Target (kcal)",
-                    min_value=500, max_value=5000, value=2000, step=50,
-                    help="Recommended: 1800–2200 kcal for average adult",
+
+                st.markdown("**Health Profile** *(used to calculate your calorie need)*")
+                col_sex, col_age = st.columns(2)
+                sex_r = col_sex.selectbox("Sex", ["Male", "Female"])
+                age_r = col_age.number_input("Age (years)", min_value=10, max_value=100, value=25, step=1)
+
+                col_wt, col_ht = st.columns(2)
+                weight_r = col_wt.number_input("Weight (kg)", min_value=20.0, max_value=300.0, value=65.0, step=0.5)
+                height_r = col_ht.number_input("Height (cm)", min_value=100.0, max_value=250.0, value=165.0, step=0.5)
+
+                activity_r = st.selectbox("Activity Level", list(_ACTIVITY_OPTIONS.keys()))
+
+                # Calculate BMR using Mifflin-St Jeor
+                if sex_r == "Male":
+                    bmr = (10 * weight_r) + (6.25 * height_r) - (5 * age_r) + 5
+                else:
+                    bmr = (10 * weight_r) + (6.25 * height_r) - (5 * age_r) - 161
+                calorie_need_r = round(bmr * _ACTIVITY_OPTIONS[activity_r])
+
+                st.info(
+                    f"**Estimated Calorie Need: {calorie_need_r} kcal/day**  \n"
+                    f"BMR = {round(bmr)} kcal × {_ACTIVITY_OPTIONS[activity_r]} ({activity_r.split('(')[0].strip()})"
                 )
+
+                target_r = st.number_input(
+                    "Your Daily Calorie Target (kcal)",
+                    min_value=500, max_value=5000,
+                    value=calorie_need_r, step=50,
+                    help="Pre-filled from your calorie need — adjust as you wish.",
+                )
+
                 submitted_r = st.form_submit_button(
                     "Create Account", use_container_width=True, type="primary"
                 )
@@ -127,7 +161,11 @@ def show_auth_page() -> dict | None:
                         st.error(e)
                 else:
                     ok, msg = db.register_user(
-                        name, username_r, email_r, password_r, int(target_r)
+                        name, username_r, email_r, password_r, int(target_r),
+                        age=int(age_r), weight_kg=float(weight_r),
+                        height_cm=float(height_r), sex=sex_r,
+                        activity_level=activity_r,
+                        calorie_need=calorie_need_r,
                     )
                     if ok:
                         st.success("Account created! Switch to the Sign In tab to log in.")
