@@ -38,17 +38,8 @@ if "nav_date" not in st.session_state:
 
 # ─── Sidebar ──────────────────────────────────────────────────────────────────
 with st.sidebar:
-    st.markdown("""
-    <div style="padding: 1rem 0 0.5rem; text-align: center;">
-        <div style="font-size:2.5rem; line-height:1.2;">🥗</div>
-        <div style="font-size:1.1rem; font-weight:800; color:#FFFFFF; margin-top:0.25rem;">
-            Calorie Tracker
-        </div>
-        <div style="font-size:0.72rem; color:#A5B4FC; text-transform:uppercase;
-                    letter-spacing:0.08em;">Indian Vegetarian Edition</div>
-    </div>
-    """, unsafe_allow_html=True)
-
+    st.markdown("## 🥗 Calorie Tracker")
+    st.caption("INDIAN VEGETARIAN EDITION")
     st.divider()
     show_sidebar_user(user)
 
@@ -56,20 +47,12 @@ with st.sidebar:
     date_str_sidebar = st.session_state["nav_date"].strftime("%Y-%m-%d")
     current_target = db.get_daily_target(user_id, date_str_sidebar)
 
-    st.markdown("""
-    <p style="font-size:0.72rem; font-weight:700; text-transform:uppercase;
-              letter-spacing:0.08em; color:#A5B4FC; margin-bottom:0.25rem;">
-        🎯 Today's Target
-    </p>
-    """, unsafe_allow_html=True)
-
     new_target = st.number_input(
-        "target_kcal",
+        "🎯 Daily Target (kcal)",
         min_value=500,
         max_value=5000,
         value=current_target,
         step=50,
-        label_visibility="collapsed",
         help="Recommended: 1800–2200 kcal for average adults",
     )
     if st.button("Save Target", use_container_width=True, type="primary"):
@@ -99,47 +82,38 @@ status = _status(pct_consumed)
 STATUS_COLORS = {"green": "#10B981", "amber": "#F59E0B", "red": "#EF4444"}
 ring_color = STATUS_COLORS[status]
 
-# ─── 1. Header row ────────────────────────────────────────────────────────────
-col_title, col_date_nav = st.columns([2, 3])
+# ─── 1. Header ────────────────────────────────────────────────────────────────
+first_name = user["name"].split()[0]
+st.subheader(f"🥗 Calorie Tracker")
+st.caption(f"Welcome back, **{first_name}**")
 
-with col_title:
-    first_name = user["name"].split()[0]
-    st.markdown(f"""
-    <div style="padding-top:0.5rem;">
-        <h1 style="margin-bottom:0; font-size:1.75rem !important;">🥗 Calorie Tracker</h1>
-        <p style="color:#64748B; font-size:0.875rem; margin:0.1rem 0 0;">
-            Welcome back, <strong>{first_name}</strong>
-        </p>
-    </div>
-    """, unsafe_allow_html=True)
+# Date navigation — flat single row, no nested columns
+prev_c, date_c, next_c, today_c = st.columns([1, 4, 1, 1])
+with prev_c:
+    if st.button("◀", use_container_width=True, help="Previous day"):
+        st.session_state["nav_date"] -= timedelta(days=1)
+        st.rerun()
+with date_c:
+    picked = st.date_input(
+        "Select date",
+        value=st.session_state["nav_date"],
+        max_value=date.today(),
+        label_visibility="collapsed",
+    )
+    if picked != st.session_state["nav_date"]:
+        st.session_state["nav_date"] = picked
+        st.rerun()
+with next_c:
+    if st.button("▶", use_container_width=True,
+                 disabled=st.session_state["nav_date"] >= date.today()):
+        st.session_state["nav_date"] += timedelta(days=1)
+        st.rerun()
+with today_c:
+    if st.button("Today", use_container_width=True):
+        st.session_state["nav_date"] = date.today()
+        st.rerun()
 
-with col_date_nav:
-    dn1, dn2, dn3, dn4 = st.columns([1, 3, 1, 1])
-    with dn1:
-        if st.button("◀", help="Previous day"):
-            st.session_state["nav_date"] -= timedelta(days=1)
-            st.rerun()
-    with dn2:
-        picked = st.date_input(
-            "date_picker",
-            value=st.session_state["nav_date"],
-            max_value=date.today(),
-            label_visibility="collapsed",
-        )
-        if picked != st.session_state["nav_date"]:
-            st.session_state["nav_date"] = picked
-            st.rerun()
-    with dn3:
-        if st.button("▶", help="Next day",
-                     disabled=st.session_state["nav_date"] >= date.today()):
-            st.session_state["nav_date"] += timedelta(days=1)
-            st.rerun()
-    with dn4:
-        if st.button("Today"):
-            st.session_state["nav_date"] = date.today()
-            st.rerun()
-
-st.markdown("<hr style='margin:0.75rem 0; border-color:#E2E8F0;'>", unsafe_allow_html=True)
+st.divider()
 
 # ─── 2. Hero metrics row ──────────────────────────────────────────────────────
 ring_col, m1, m2, m3 = st.columns([2, 1, 1, 1])
