@@ -187,6 +187,8 @@ st.markdown(
 )
 
 # ─── 3. Add Food ──────────────────────────────────────────────────────────────
+_OTHERS = "Others (Custom)"
+
 with st.expander("➕ Add Food Entry", expanded=True):
     c1, c2 = st.columns([1, 2])
     with c1:
@@ -197,44 +199,59 @@ with st.expander("➕ Add Food Entry", expanded=True):
     if search_mode == "Category":
         cat_col, food_col = st.columns(2)
         with cat_col:
-            selected_category = st.selectbox("📂 Category", options=CATEGORIES)
+            selected_category = st.selectbox("📂 Category", options=[_OTHERS] + CATEGORIES)
         with food_col:
-            cat_foods = get_foods_by_category(selected_category)
-            selected_food = st.selectbox("🍛 Food Item", options=sorted(cat_foods.keys()))
+            if selected_category == _OTHERS:
+                selected_food = _OTHERS
+            else:
+                cat_foods = get_foods_by_category(selected_category)
+                selected_food = st.selectbox("🍛 Food Item", options=sorted(cat_foods.keys()))
     else:
         selected_food = st.selectbox(
-            "🔍 Search Food", options=get_all_food_names(), help="Type to filter"
+            "🔍 Search Food", options=[_OTHERS] + get_all_food_names(), help="Type to filter"
         )
 
-    if selected_food:
-        food_info    = get_food_info(selected_food)
-        cal_per_unit = food_info.get("calories", 0)
-        unit         = food_info.get("unit", "serving")
+    # Custom food inputs when "Others" is chosen
+    if selected_food == _OTHERS:
+        cf1, cf2 = st.columns(2)
+        custom_food_name = cf1.text_input(
+            "Food Name", placeholder="e.g. Homemade Khichdi", key="custom_food_name"
+        )
+        custom_cal = cf2.number_input(
+            "Calories per serving (kcal)", min_value=1, max_value=5000, value=200, step=5,
+            key="custom_cal"
+        )
+        food_name_to_log = custom_food_name.strip() if custom_food_name.strip() else ""
+        cal_per_unit = float(custom_cal)
+        unit = "serving"
+    else:
+        food_info        = get_food_info(selected_food)
+        cal_per_unit     = food_info.get("calories", 0)
+        unit             = food_info.get("unit", "serving")
+        food_name_to_log = selected_food
 
-        qty_col, info_col, btn_col = st.columns([1, 2, 1])
-
-        with qty_col:
-            quantity = st.number_input(
-                f"Quantity ({unit})",
-                min_value=0.5, max_value=50.0, value=1.0, step=0.5,
+    qty_col, info_col, btn_col = st.columns([1, 2, 1])
+    with qty_col:
+        quantity = st.number_input(
+            f"Quantity ({unit})",
+            min_value=0.5, max_value=50.0, value=1.0, step=0.5,
+        )
+    with info_col:
+        total_cal = round(quantity * cal_per_unit, 1)
+        st.info(
+            f"**{cal_per_unit} kcal** per {unit}  \n"
+            f"**Total for this entry: {total_cal} kcal**"
+        )
+    with btn_col:
+        st.markdown("<br>", unsafe_allow_html=True)
+        add_disabled = (selected_food == _OTHERS and not food_name_to_log)
+        if st.button("➕ Add", type="primary", use_container_width=True, disabled=add_disabled):
+            db.add_food_entry(
+                user_id, date_str, meal_period,
+                food_name_to_log, quantity, unit, cal_per_unit,
             )
-
-        with info_col:
-            total_cal = round(quantity * cal_per_unit, 1)
-            st.info(
-                f"**{cal_per_unit} kcal** per {unit}  \n"
-                f"**Total for this entry: {total_cal} kcal**"
-            )
-
-        with btn_col:
-            st.markdown("<br>", unsafe_allow_html=True)
-            if st.button("➕ Add", type="primary", use_container_width=True):
-                db.add_food_entry(
-                    user_id, date_str, meal_period,
-                    selected_food, quantity, unit, cal_per_unit,
-                )
-                st.toast(f"Added {selected_food} to {meal_period} — {total_cal} kcal", icon="✅")
-                st.rerun()
+            st.toast(f"Added {food_name_to_log} to {meal_period} — {total_cal} kcal", icon="✅")
+            st.rerun()
 
 # ─── 4. Food Log ──────────────────────────────────────────────────────────────
 st.markdown(
@@ -403,7 +420,7 @@ with tab2:
     )
     st.plotly_chart(fig_week, use_container_width=True, config={"displayModeBar": False})
 
-# ─── 6. Food Reference Table ──────────────────────────────────────────────────
+# ─── 6. Food Reference Table & Footer ────────────────────────────────────────
 with st.expander(f"📖 Food Calorie Reference Table ({len(FOOD_DATABASE)} items)"):
     ref_df = pd.DataFrame([
         {
@@ -423,7 +440,55 @@ with st.expander(f"📖 Food Calorie Reference Table ({len(FOOD_DATABASE)} items
 
     st.dataframe(ref_df.reset_index(drop=True), use_container_width=True, height=400)
 
-# ─── 7. Footer ────────────────────────────────────────────────────────────────
+# ─── 7. Admin Dashboard (superadmin only) ─────────────────────────────────────
+if user.get("role") == "superadmin":
+    st.divider()
+    with st.expander("🔐 Admin Dashboard", expanded=False):
+        st.markdown("**All Registered Users**")
+        all_users = db.get_all_users()
+        if all_users:
+            users_df = pd.DataFrame(all_users)[
+                ["name", "username", "email", "role", "sex", "age",
+                 "weight_kg", "height_cm", "activity_level",
+                 "calorie_need", "default_target", "created_at"]
+            ]
+            users_df.columns = [
+                "Name", "Username", "Email", "Role", "Sex", "Age",
+                "Weight (kg)", "Height (cm)", "Activity Level",
+                "Calorie Need", "Daily Target", "Joined",
+            ]
+            st.dataframe(users_df, use_container_width=True, height=300)
+        else:
+            st.info("No users found.")
+
+        st.markdown("**Food Log — All Users**")
+        all_logs = db.get_admin_food_log(limit=1000)
+        if all_logs:
+            logs_df = pd.DataFrame(all_logs)[
+                ["date", "name", "username", "meal_period",
+                 "food_name", "quantity", "unit", "total_calories"]
+            ]
+            logs_df.columns = [
+                "Date", "Name", "Username", "Meal",
+                "Food", "Qty", "Unit", "Calories (kcal)",
+            ]
+            # Filter by user
+            user_filter = st.selectbox(
+                "Filter by user",
+                ["All"] + sorted(logs_df["Username"].unique().tolist()),
+                key="admin_user_filter",
+            )
+            if user_filter != "All":
+                logs_df = logs_df[logs_df["Username"] == user_filter]
+            st.dataframe(logs_df.reset_index(drop=True), use_container_width=True, height=400)
+
+            total_entries = len(logs_df)
+            total_kcal    = logs_df["Calories (kcal)"].sum()
+            st.caption(f"Showing {total_entries} entries · {round(total_kcal)} kcal total")
+        else:
+            st.info("No food log entries yet.")
+
+# ─── 8. Footer ────────────────────────────────────────────────────────────────
 st.markdown("<br>", unsafe_allow_html=True)
 st.caption(
     "⚠️ **Disclaimer:** This app is for personal calorie tracking purposes only and does not "

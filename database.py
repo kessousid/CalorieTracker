@@ -9,7 +9,7 @@ os.makedirs(_DATA_DIR, exist_ok=True)
 DB_PATH = os.path.join(_DATA_DIR, "calorie_tracker.db")
 
 # Schema version: bump when tables change incompatibly
-SCHEMA_VERSION = 4
+SCHEMA_VERSION = 5
 
 
 def get_connection():
@@ -38,6 +38,7 @@ def init_db():
                 VALUES ('version', ?)
             """, (str(SCHEMA_VERSION),))
         conn.commit()
+    _ensure_superadmin()
 
 
 def _migrate(conn, from_version: int):
@@ -75,6 +76,12 @@ def _migrate(conn, from_version: int):
             except Exception:
                 pass  # column already exists
 
+    if from_version < 5:
+        try:
+            conn.execute("ALTER TABLE users ADD COLUMN role TEXT NOT NULL DEFAULT 'user'")
+        except Exception:
+            pass  # column already exists
+
     conn.execute("""
         CREATE TABLE IF NOT EXISTS daily_settings (
             user_id INTEGER NOT NULL,
@@ -102,6 +109,33 @@ def _migrate(conn, from_version: int):
 
     conn.execute("CREATE INDEX IF NOT EXISTS idx_food_log_user_date ON food_log(user_id, date)")
     conn.execute("CREATE INDEX IF NOT EXISTS idx_settings_user_date ON daily_settings(user_id, date)")
+
+
+# ─── Superadmin bootstrap ─────────────────────────────────────────────────────
+
+_SUPERADMIN_USERNAME = "superadmin"
+_SUPERADMIN_DEFAULT_PW = "Admin@1234"
+
+def _ensure_superadmin():
+    """Create the default superadmin account if no superadmin exists yet."""
+    with get_connection() as conn:
+        row = conn.execute(
+            "SELECT id FROM users WHERE role = 'superadmin'"
+        ).fetchone()
+        if row:
+            return
+        pw_hash, salt = _hash_password(_SUPERADMIN_DEFAULT_PW)
+        try:
+            conn.execute("""
+                INSERT INTO users
+                    (name, username, email, password_hash, salt, default_target, role)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            """, ("Super Admin", _SUPERADMIN_USERNAME,
+                  "superadmin@calorietracker.local",
+                  pw_hash, salt, 2000, "superadmin"))
+            conn.commit()
+        except Exception:
+            pass  # already exists (race condition / re-run)
 
 
 # ─── Password helpers ─────────────────────────────────────────────────────────
@@ -151,13 +185,13 @@ def verify_user(username: str, password: str) -> dict | None:
     """Returns user dict on success, None on failure."""
     with get_connection() as conn:
         row = conn.execute("""
-            SELECT id, name, username, email, password_hash, salt, default_target
+            SELECT id, name, username, email, password_hash, salt, default_target, role
             FROM users WHERE username = ?
         """, (username.strip(),)).fetchone()
     if row and _verify_password(password, row[4], row[5]):
         return {
             "id": row[0], "name": row[1], "username": row[2],
-            "email": row[3], "default_target": row[6],
+            "email": row[3], "default_target": row[6], "role": row[7],
         }
     return None
 
@@ -165,12 +199,12 @@ def verify_user(username: str, password: str) -> dict | None:
 def get_user_by_id(user_id: int) -> dict | None:
     with get_connection() as conn:
         row = conn.execute("""
-            SELECT id, name, username, email, default_target
+            SELECT id, name, username, email, default_target, role
             FROM users WHERE id = ?
         """, (user_id,)).fetchone()
     if row:
         return {"id": row[0], "name": row[1], "username": row[2],
-                "email": row[3], "default_target": row[4]}
+                "email": row[3], "default_target": row[4], "role": row[5]}
     return None
 
 
@@ -298,3 +332,48 @@ def get_weekly_summary(user_id: int, reference_date: str) -> list[dict]:
             ORDER BY date
         """, (user_id, reference_date, reference_date)).fetchall()
     return [{"date": r[0], "total": round(r[1], 1)} for r in rows]
+
+
+# ─── Admin queries (superadmin only) ──────────────────────────────────────────
+
+def get_all_users() -> list[dict]:
+    """Return all registered users (excluding password data)."""
+    with get_connection() as conn:
+        rows = conn.execute("""
+            SELECT id, name, username, email, role, default_target,
+                   age, weight_kg, height_cm, sex, activity_level, calorie_need,
+                   created_at
+            FROM users
+            ORDER BY created_at DESC
+        """).fetchall()
+    return [
+        {
+            "id": r[0], "name": r[1], "username": r[2], "email": r[3],
+            "role": r[4], "default_target": r[5],
+            "age": r[6], "weight_kg": r[7], "height_cm": r[8],
+            "sex": r[9], "activity_level": r[10], "calorie_need": r[11],
+            "created_at": r[12],
+        }
+        for r in rows
+    ]
+
+
+def get_admin_food_log(limit: int = 1000) -> list[dict]:
+    """Return recent food log entries across all users with username."""
+    with get_connection() as conn:
+        rows = conn.execute("""
+            SELECT f.id, u.name, u.username, f.date, f.meal_period,
+                   f.food_name, f.quantity, f.unit, f.total_calories
+            FROM food_log f
+            JOIN users u ON u.id = f.user_id
+            ORDER BY f.date DESC, f.id DESC
+            LIMIT ?
+        """, (limit,)).fetchall()
+    return [
+        {
+            "id": r[0], "name": r[1], "username": r[2], "date": r[3],
+            "meal_period": r[4], "food_name": r[5],
+            "quantity": r[6], "unit": r[7], "total_calories": r[8],
+        }
+        for r in rows
+    ]
