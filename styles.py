@@ -32,12 +32,6 @@ footer                       { visibility: hidden !important; }
 [data-testid="stMainBlockContainer"] {
     background-color: #F1F5F9 !important;
 }
-.block-container {
-    padding-left: 2.5rem !important;
-    padding-right: 2.5rem !important;
-    padding-top: 1.5rem !important;
-    max-width: 100% !important;
-}
 
 /* ── Sidebar: dark indigo gradient ── */
 [data-testid="stSidebar"] {
