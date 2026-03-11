@@ -198,24 +198,29 @@ def show_sidebar_user(user: dict):
 
     # Profile settings
     with st.sidebar.expander("⚙️ Profile Settings"):
-        new_target = st.number_input(
-            "Default daily target (kcal)",
-            min_value=500, max_value=5000,
-            value=user["default_target"], step=50,
-            key="profile_target",
-        )
-        col1, col2 = st.columns(2)
-        if col1.button("Save", use_container_width=True, key="save_profile"):
-            db.update_default_target(user["id"], int(new_target))
-            st.session_state["user"]["default_target"] = int(new_target)
-            st.success("Saved!")
-            st.rerun()
+        if user.get("role") != "superadmin":
+            st.markdown("**Default Calorie Target**")
+            new_target = st.number_input(
+                "Daily target (kcal)",
+                min_value=500, max_value=5000,
+                value=user["default_target"], step=50,
+                key="profile_target",
+            )
+            if st.button("Save Target", use_container_width=True, key="save_profile"):
+                db.update_default_target(user["id"], int(new_target))
+                st.session_state["user"]["default_target"] = int(new_target)
+                st.success("Target saved!")
+                st.rerun()
+            st.markdown("---")
 
         st.markdown("**Change Password**")
-        new_pw = st.text_input("New password", type="password", key="new_pw")
-        if col2.button("Update", use_container_width=True, key="update_pw"):
+        new_pw      = st.text_input("New password", type="password", key="new_pw")
+        confirm_pw  = st.text_input("Confirm password", type="password", key="confirm_pw")
+        if st.button("Update Password", use_container_width=True, key="update_pw"):
             if len(new_pw) < 6:
-                st.error("Min 6 characters")
+                st.error("Minimum 6 characters.")
+            elif new_pw != confirm_pw:
+                st.error("Passwords do not match.")
             else:
                 db.update_password(user["id"], new_pw)
                 st.success("Password updated!")

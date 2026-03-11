@@ -30,7 +30,8 @@ user = show_auth_page()
 if user is None:
     st.stop()
 
-user_id: int = user["id"]
+user_id: int  = user["id"]
+is_superadmin: bool = user.get("role") == "superadmin"
 
 # ─── Date nav state ───────────────────────────────────────────────────────────
 if "nav_date" not in st.session_state:
@@ -39,26 +40,96 @@ if "nav_date" not in st.session_state:
 # ─── Sidebar ──────────────────────────────────────────────────────────────────
 with st.sidebar:
     st.markdown("🥗 **Calorie Tracker**")
-    st.caption("Indian Vegetarian Edition")
+    st.caption("Admin Panel" if is_superadmin else "Indian Vegetarian Edition")
     st.divider()
     show_sidebar_user(user)
 
-    # Daily target
-    date_str_sidebar = st.session_state["nav_date"].strftime("%Y-%m-%d")
-    current_target = db.get_daily_target(user_id, date_str_sidebar)
+    if not is_superadmin:
+        # Daily target — regular users only
+        date_str_sidebar = st.session_state["nav_date"].strftime("%Y-%m-%d")
+        current_target = db.get_daily_target(user_id, date_str_sidebar)
+        new_target = st.number_input(
+            "🎯 Daily Target (kcal)",
+            min_value=500, max_value=5000,
+            value=current_target, step=50,
+            help="Recommended: 1800–2200 kcal for average adults",
+        )
+        if st.button("Save Target", use_container_width=True, type="primary"):
+            db.set_daily_target(user_id, date_str_sidebar, int(new_target))
+            st.success(f"Target set to {int(new_target)} kcal")
+            st.rerun()
 
-    new_target = st.number_input(
-        "🎯 Daily Target (kcal)",
-        min_value=500,
-        max_value=5000,
-        value=current_target,
-        step=50,
-        help="Recommended: 1800–2200 kcal for average adults",
-    )
-    if st.button("Save Target", use_container_width=True, type="primary"):
-        db.set_daily_target(user_id, date_str_sidebar, int(new_target))
-        st.success(f"Target set to {int(new_target)} kcal")
-        st.rerun()
+# ─── Superadmin: dedicated dashboard, no food tracking UI ─────────────────────
+if is_superadmin:
+    st.markdown("## 🔐 Admin Dashboard")
+    st.caption("Application usage overview — visible to superadmin only.")
+
+    all_users = db.get_all_users()
+    all_logs  = db.get_admin_food_log(limit=2000)
+
+    # Summary metrics
+    regular_users = [u for u in all_users if u["role"] != "superadmin"]
+    today_str     = date.today().strftime("%Y-%m-%d")
+    today_logs    = [l for l in all_logs if l["date"] == today_str]
+
+    mc1, mc2, mc3, mc4 = st.columns(4)
+    mc1.metric("Total Users", len(regular_users))
+    mc2.metric("Total Entries", len(all_logs))
+    mc3.metric("Active Today", len({l["username"] for l in today_logs}))
+    mc4.metric("Calories Logged Today", f"{round(sum(l['total_calories'] for l in today_logs))} kcal")
+
+    st.divider()
+
+    tab_users, tab_log = st.tabs(["👥  Users", "🍽️  Food Log"])
+
+    with tab_users:
+        if regular_users:
+            users_df = pd.DataFrame(regular_users)[[
+                "name", "username", "email", "sex", "age",
+                "weight_kg", "height_cm", "activity_level",
+                "calorie_need", "default_target", "created_at",
+            ]]
+            users_df.columns = [
+                "Name", "Username", "Email", "Sex", "Age",
+                "Weight (kg)", "Height (cm)", "Activity Level",
+                "Calorie Need", "Daily Target", "Joined",
+            ]
+            st.dataframe(users_df, use_container_width=True, height=400)
+        else:
+            st.info("No regular users registered yet.")
+
+    with tab_log:
+        if all_logs:
+            logs_df = pd.DataFrame(all_logs)[[
+                "date", "name", "username", "meal_period",
+                "food_name", "quantity", "unit", "total_calories",
+            ]]
+            logs_df.columns = [
+                "Date", "Name", "Username", "Meal",
+                "Food", "Qty", "Unit", "Calories (kcal)",
+            ]
+            filter_col1, filter_col2 = st.columns(2)
+            user_filter = filter_col1.selectbox(
+                "Filter by user",
+                ["All"] + sorted(logs_df["Username"].unique().tolist()),
+                key="admin_user_filter",
+            )
+            date_filter = filter_col2.date_input(
+                "Filter by date (optional)", value=None, key="admin_date_filter"
+            )
+            if user_filter != "All":
+                logs_df = logs_df[logs_df["Username"] == user_filter]
+            if date_filter:
+                logs_df = logs_df[logs_df["Date"] == str(date_filter)]
+            st.dataframe(logs_df.reset_index(drop=True), use_container_width=True, height=450)
+            st.caption(
+                f"{len(logs_df)} entries · "
+                f"{round(logs_df['Calories (kcal)'].sum())} kcal total"
+            )
+        else:
+            st.info("No food log entries yet.")
+
+    st.stop()  # nothing below renders for superadmin
 
 # ─── Fetch data for selected date ─────────────────────────────────────────────
 selected_date = st.session_state["nav_date"]
@@ -439,54 +510,6 @@ with st.expander(f"📖 Food Calorie Reference Table ({len(FOOD_DATABASE)} items
         ref_df = ref_df[ref_df["Category"] == filter_cat]
 
     st.dataframe(ref_df.reset_index(drop=True), use_container_width=True, height=400)
-
-# ─── 7. Admin Dashboard (superadmin only) ─────────────────────────────────────
-if user.get("role") == "superadmin":
-    st.divider()
-    with st.expander("🔐 Admin Dashboard", expanded=False):
-        st.markdown("**All Registered Users**")
-        all_users = db.get_all_users()
-        if all_users:
-            users_df = pd.DataFrame(all_users)[
-                ["name", "username", "email", "role", "sex", "age",
-                 "weight_kg", "height_cm", "activity_level",
-                 "calorie_need", "default_target", "created_at"]
-            ]
-            users_df.columns = [
-                "Name", "Username", "Email", "Role", "Sex", "Age",
-                "Weight (kg)", "Height (cm)", "Activity Level",
-                "Calorie Need", "Daily Target", "Joined",
-            ]
-            st.dataframe(users_df, use_container_width=True, height=300)
-        else:
-            st.info("No users found.")
-
-        st.markdown("**Food Log — All Users**")
-        all_logs = db.get_admin_food_log(limit=1000)
-        if all_logs:
-            logs_df = pd.DataFrame(all_logs)[
-                ["date", "name", "username", "meal_period",
-                 "food_name", "quantity", "unit", "total_calories"]
-            ]
-            logs_df.columns = [
-                "Date", "Name", "Username", "Meal",
-                "Food", "Qty", "Unit", "Calories (kcal)",
-            ]
-            # Filter by user
-            user_filter = st.selectbox(
-                "Filter by user",
-                ["All"] + sorted(logs_df["Username"].unique().tolist()),
-                key="admin_user_filter",
-            )
-            if user_filter != "All":
-                logs_df = logs_df[logs_df["Username"] == user_filter]
-            st.dataframe(logs_df.reset_index(drop=True), use_container_width=True, height=400)
-
-            total_entries = len(logs_df)
-            total_kcal    = logs_df["Calories (kcal)"].sum()
-            st.caption(f"Showing {total_entries} entries · {round(total_kcal)} kcal total")
-        else:
-            st.info("No food log entries yet.")
 
 # ─── 8. Footer ────────────────────────────────────────────────────────────────
 st.markdown("<br>", unsafe_allow_html=True)
