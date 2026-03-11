@@ -315,7 +315,7 @@ st.plotly_chart(fig_week, use_container_width=True)
 st.divider()
 
 # ─── Food Reference Table ─────────────────────────────────────────────────────
-with st.expander("📖 Food Calorie Reference Table (658 items)"):
+with st.expander(f"📖 Food Calorie Reference Table ({len(FOOD_DATABASE)} items)"):
     ref_df = pd.DataFrame([
         {
             "Food Item": name,

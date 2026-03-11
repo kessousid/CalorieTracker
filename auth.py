@@ -1,6 +1,7 @@
 import re
 import streamlit as st
 import database as db
+from food_data import FOOD_DATABASE, CATEGORIES
 
 
 def _is_valid_email(email: str) -> bool:
@@ -32,8 +33,8 @@ def show_auth_page() -> dict | None:
     with mid:
         st.markdown('<p class="auth-title">🥗 Calorie Tracker</p>', unsafe_allow_html=True)
         st.markdown(
-            '<p class="auth-sub">Indian Vegetarian Edition &nbsp;·&nbsp; '
-            '658 foods across 20 categories</p>',
+            f'<p class="auth-sub">Indian Vegetarian Edition &nbsp;·&nbsp; '
+            f'{len(FOOD_DATABASE)} foods across {len(CATEGORIES)} categories</p>',
             unsafe_allow_html=True,
         )
 
