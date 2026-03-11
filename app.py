@@ -38,8 +38,8 @@ if "nav_date" not in st.session_state:
 
 # ─── Sidebar ──────────────────────────────────────────────────────────────────
 with st.sidebar:
-    st.markdown("## 🥗 Calorie Tracker")
-    st.caption("INDIAN VEGETARIAN EDITION")
+    st.markdown("🥗 **Calorie Tracker**")
+    st.caption("Indian Vegetarian Edition")
     st.divider()
     show_sidebar_user(user)
 
@@ -84,13 +84,13 @@ ring_color = STATUS_COLORS[status]
 
 # ─── 1. Header ────────────────────────────────────────────────────────────────
 first_name = user["name"].split()[0]
-st.subheader(f"🥗 Calorie Tracker")
-st.caption(f"Welcome back, **{first_name}**")
+st.markdown(f"### Welcome back, {first_name}!")
+st.caption(selected_date.strftime("%A, %d %B %Y"))
 
-# Date navigation — flat single row, no nested columns
+# Date navigation — flat row, plain ASCII button labels (no Unicode arrows)
 prev_c, date_c, next_c, today_c = st.columns([1, 4, 1, 1])
 with prev_c:
-    if st.button("◀", use_container_width=True, help="Previous day"):
+    if st.button("Prev", use_container_width=True):
         st.session_state["nav_date"] -= timedelta(days=1)
         st.rerun()
 with date_c:
@@ -104,7 +104,7 @@ with date_c:
         st.session_state["nav_date"] = picked
         st.rerun()
 with next_c:
-    if st.button("▶", use_container_width=True,
+    if st.button("Next", use_container_width=True,
                  disabled=st.session_state["nav_date"] >= date.today()):
         st.session_state["nav_date"] += timedelta(days=1)
         st.rerun()
