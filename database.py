@@ -2,7 +2,9 @@ import sqlite3
 import os
 from datetime import date
 
-DB_PATH = os.path.join(os.path.dirname(__file__), "calorie_tracker.db")
+_DATA_DIR = os.path.join(os.path.expanduser("~"), ".calorie_tracker_data")
+os.makedirs(_DATA_DIR, exist_ok=True)
+DB_PATH = os.path.join(_DATA_DIR, "calorie_tracker.db")
 
 
 def get_connection():
