@@ -84,7 +84,7 @@ ring_color = STATUS_COLORS[status]
 
 # ─── 1. Header ────────────────────────────────────────────────────────────────
 first_name = user["name"].split()[0]
-st.markdown(f"### Welcome back, {first_name}!")
+st.markdown(f"#### Welcome back, {first_name}!")
 st.caption(selected_date.strftime("%A, %d %B %Y"))
 
 # Date navigation — flat row, plain ASCII button labels (no Unicode arrows)
