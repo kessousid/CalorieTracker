@@ -121,9 +121,7 @@ footer                       { visibility: hidden !important; }
     border-radius: 8px !important;
 }
 [data-testid="stSidebar"] [data-testid="stExpander"] summary,
-[data-testid="stSidebar"] [data-testid="stExpander"] summary *,
-[data-testid="stSidebar"] details > summary,
-[data-testid="stSidebar"] details > summary * {
+[data-testid="stSidebar"] details > summary {
     color: #FFFFFF !important;
     font-weight: 600 !important;
 }
@@ -152,9 +150,7 @@ footer                       { visibility: hidden !important; }
     box-shadow: 0 1px 4px rgba(0,0,0,0.06) !important;
 }
 [data-testid="stExpander"] summary,
-[data-testid="stExpander"] summary *,
-[data-testid="stExpander"] details > summary,
-[data-testid="stExpander"] details > summary * {
+[data-testid="stExpander"] details > summary {
     font-weight: 700 !important;
     color: #0F172A !important;
     font-size: 0.95rem !important;
