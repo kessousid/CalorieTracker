@@ -8,8 +8,11 @@ def inject_css():
 /* ── Google Font ── */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
-/* ── Global font ── */
-*, *::before, *::after {
+/* ── Global font — target text elements only, NOT icon spans ── */
+p, h1, h2, h3, h4, h5, h6, li, label, input, textarea, select,
+button, caption, td, th, blockquote, figcaption,
+.stMarkdown, .stText, .stTextInput, .stNumberInput, .stSelectbox,
+.stRadio, .stCheckbox, .stSlider, .stButton {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
 }
 
