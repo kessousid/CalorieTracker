@@ -41,18 +41,25 @@ footer                       { visibility: hidden !important; }
     background: transparent !important;
 }
 
-/* Sidebar: all text white/lavender */
+/* Sidebar: all text white/lavender — cover tag names AND Streamlit generated classes */
 [data-testid="stSidebar"] p,
 [data-testid="stSidebar"] span,
 [data-testid="stSidebar"] div,
 [data-testid="stSidebar"] small,
-[data-testid="stSidebar"] label {
+[data-testid="stSidebar"] label,
+[data-testid="stSidebar"] li,
+[data-testid="stSidebar"] .stMarkdown,
+[data-testid="stSidebar"] .stTextInput label,
+[data-testid="stSidebar"] .stNumberInput label,
+[data-testid="stSidebar"] .stSelectbox label,
+[data-testid="stSidebar"] .stSlider label {
     color: #C7D2FE !important;
 }
 [data-testid="stSidebar"] h1,
 [data-testid="stSidebar"] h2,
 [data-testid="stSidebar"] h3,
-[data-testid="stSidebar"] strong {
+[data-testid="stSidebar"] strong,
+[data-testid="stSidebar"] b {
     color: #FFFFFF !important;
 }
 [data-testid="stSidebar"] hr {
@@ -109,12 +116,15 @@ footer                       { visibility: hidden !important; }
 
 /* Sidebar: expander */
 [data-testid="stSidebar"] [data-testid="stExpander"] {
-    background: rgba(99, 102, 241, 0.1) !important;
-    border: 1px solid rgba(167, 139, 250, 0.3) !important;
+    background: rgba(99, 102, 241, 0.12) !important;
+    border: 1px solid rgba(167, 139, 250, 0.35) !important;
     border-radius: 8px !important;
 }
-[data-testid="stSidebar"] [data-testid="stExpander"] summary {
-    color: #C7D2FE !important;
+[data-testid="stSidebar"] [data-testid="stExpander"] summary,
+[data-testid="stSidebar"] [data-testid="stExpander"] summary *,
+[data-testid="stSidebar"] details > summary,
+[data-testid="stSidebar"] details > summary * {
+    color: #FFFFFF !important;
     font-weight: 600 !important;
 }
 
@@ -141,7 +151,10 @@ footer                       { visibility: hidden !important; }
     border-radius: 12px !important;
     box-shadow: 0 1px 4px rgba(0,0,0,0.06) !important;
 }
-[data-testid="stExpander"] summary {
+[data-testid="stExpander"] summary,
+[data-testid="stExpander"] summary *,
+[data-testid="stExpander"] details > summary,
+[data-testid="stExpander"] details > summary * {
     font-weight: 700 !important;
     color: #0F172A !important;
     font-size: 0.95rem !important;
