@@ -25,19 +25,38 @@ def show_auth_page() -> dict | None:
 
     # ── Left: Hero panel ──────────────────────────────────────────────────────
     with left_col:
+        feature_style = (
+            "display:flex;align-items:center;gap:0.5rem;"
+            "color:#C7D2FE;font-size:0.875rem;margin-bottom:0.55rem;"
+        )
+        check_style = "color:#34D399;font-weight:800;font-size:1rem;"
         st.markdown(f"""
-        <div class="auth-hero">
-            <div style="font-size:3.5rem; line-height:1;">🥗</div>
-            <h1>Indian Calorie Tracker</h1>
-            <p class="hero-tagline">Your personal nutrition companion — eat mindfully, live better.</p>
+        <div style="
+            background:linear-gradient(155deg,#1E1B4B 0%,#3730A3 60%,#4338CA 100%);
+            border-radius:16px; padding:2.5rem 2rem; min-height:480px;
+            display:flex; flex-direction:column; justify-content:center; color:#FFFFFF;
+        ">
+            <div style="font-size:3.2rem;line-height:1;margin-bottom:0.5rem;">🥗</div>
+            <div style="font-size:1.7rem;font-weight:800;color:#FFFFFF;margin-bottom:0.2rem;line-height:1.2;">
+                Indian Calorie Tracker
+            </div>
+            <p style="color:#A5B4FC;font-size:0.875rem;margin-bottom:1.5rem;line-height:1.5;">
+                Your personal nutrition companion — eat mindfully, live better.
+            </p>
 
-            <div class="hero-feature"><span class="check">✓</span> {len(FOOD_DATABASE)}+ Indian vegetarian foods</div>
-            <div class="hero-feature"><span class="check">✓</span> Track Breakfast, Lunch, Dinner &amp; Snacks</div>
-            <div class="hero-feature"><span class="check">✓</span> Weekly calorie trends &amp; visual insights</div>
-            <div class="hero-feature"><span class="check">✓</span> Secure personal profiles &amp; history</div>
+            <div style="{feature_style}"><span style="{check_style}">✓</span> {len(FOOD_DATABASE)}+ Indian vegetarian foods</div>
+            <div style="{feature_style}"><span style="{check_style}">✓</span> Track Breakfast, Lunch, Dinner &amp; Snacks</div>
+            <div style="{feature_style}"><span style="{check_style}">✓</span> Weekly calorie trends &amp; visual insights</div>
+            <div style="{feature_style}"><span style="{check_style}">✓</span> Secure personal profiles &amp; history</div>
 
-            <div class="hero-stat">
-                <strong>{len(FOOD_DATABASE)}</strong>
+            <div style="
+                margin-top:2rem;background:rgba(255,255,255,0.1);
+                border:1px solid rgba(255,255,255,0.15);border-radius:10px;
+                padding:0.75rem 1rem;color:#E0E7FF;font-size:0.82rem;
+            ">
+                <strong style="color:#FFFFFF;font-size:1.4rem;font-weight:800;display:block;margin-bottom:0.1rem;">
+                    {len(FOOD_DATABASE)}
+                </strong>
                 foods across {len(CATEGORIES)} categories
             </div>
         </div>
@@ -46,7 +65,11 @@ def show_auth_page() -> dict | None:
     # ── Right: Form panel ─────────────────────────────────────────────────────
     with right_col:
         st.markdown("""
-        <div class="auth-disclaimer">
+        <div style="
+            background:#EFF6FF;border:1px solid #BFDBFE;border-radius:8px;
+            padding:0.7rem 0.9rem;margin-bottom:1rem;font-size:0.78rem;
+            color:#1D4ED8;line-height:1.55;
+        ">
             ℹ️ <strong>Disclaimer:</strong> This app is a personal tool for tracking calorie
             consumption only — not medical or dietary advice. Calorie values are approximate.
             Consult a healthcare professional for personalised guidance.
@@ -133,12 +156,19 @@ def show_sidebar_user(user: dict):
     # Avatar with initials
     initials = "".join(w[0].upper() for w in user["name"].split()[:2])
     st.sidebar.markdown(f"""
-    <div style="padding: 0.5rem 0;">
-        <div class="ct-avatar">{initials}</div>
-        <div style="font-weight:700; color:#FFFFFF; font-size:1rem; margin-bottom:2px;">
+    <div style="padding:0.5rem 0;">
+        <div style="
+            width:46px;height:46px;border-radius:50%;
+            background:linear-gradient(135deg,#6366F1,#8B5CF6);
+            display:flex;align-items:center;justify-content:center;
+            font-size:1.1rem;font-weight:800;color:#FFFFFF;
+            margin-bottom:0.4rem;
+            box-shadow:0 2px 8px rgba(99,102,241,0.4);
+        ">{initials}</div>
+        <div style="font-weight:700;color:#FFFFFF;font-size:1rem;margin-bottom:2px;">
             {user['name']}
         </div>
-        <div style="color:#A5B4FC; font-size:0.78rem;">@{user['username']}</div>
+        <div style="color:#A5B4FC;font-size:0.78rem;">@{user['username']}</div>
     </div>
     """, unsafe_allow_html=True)
 

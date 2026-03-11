@@ -3,7 +3,7 @@ import streamlit as st
 
 def inject_css():
     """Inject production-grade CSS. Must be called after set_page_config."""
-    st.html("""
+    st.markdown("""
 <style>
 /* ── Google Font ── */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
@@ -395,4 +395,4 @@ textarea:focus {
     gap: 0.4rem;
 }
 </style>
-""")
+""", unsafe_allow_html=True)

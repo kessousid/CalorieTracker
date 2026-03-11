@@ -169,35 +169,33 @@ with ring_col:
     )
     st.plotly_chart(fig_ring, use_container_width=True, config={"displayModeBar": False})
 
+PILL_ACCENT = {"green": "#10B981", "amber": "#F59E0B", "red": "#EF4444", "indigo": "#4F46E5"}
+
+def _pill(label: str, value, unit: str, accent: str) -> str:
+    color = PILL_ACCENT.get(accent, "#4F46E5")
+    return f"""
+    <div style="
+        background:#FFFFFF;border-radius:14px;text-align:center;
+        padding:1.1rem 0.75rem;
+        border-top:4px solid {color};
+        box-shadow:0 1px 4px rgba(0,0,0,0.07),0 4px 16px rgba(79,70,229,0.07);
+    ">
+        <p style="font-size:0.68rem;font-weight:700;text-transform:uppercase;
+                  letter-spacing:0.08em;color:#64748B;margin:0 0 0.2rem;">{label}</p>
+        <p style="font-size:1.9rem;font-weight:800;color:#0F172A;margin:0;line-height:1;">{value}</p>
+        <p style="font-size:0.68rem;color:#94A3B8;margin:0.15rem 0 0;">{unit}</p>
+    </div>"""
+
 with m1:
-    st.markdown(f"""
-    <div class="ct-pill">
-        <p class="pill-label">🎯 Target</p>
-        <p class="pill-value">{daily_target}</p>
-        <p class="pill-unit">kcal</p>
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown(_pill("🎯 Target", daily_target, "kcal", "indigo"), unsafe_allow_html=True)
 
 with m2:
-    consumed_color = status
-    st.markdown(f"""
-    <div class="ct-pill {consumed_color}">
-        <p class="pill-label">🍽️ Consumed</p>
-        <p class="pill-value">{daily_total}</p>
-        <p class="pill-unit">kcal</p>
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown(_pill("🍽️ Consumed", daily_total, "kcal", status), unsafe_allow_html=True)
 
 with m3:
     rem_label = "Over by" if remaining < 0 else "Remaining"
-    rem_color = "red" if remaining < 0 else ("amber" if remaining < 200 else "green")
-    st.markdown(f"""
-    <div class="ct-pill {rem_color}">
-        <p class="pill-label">⚡ {rem_label}</p>
-        <p class="pill-value">{abs(remaining)}</p>
-        <p class="pill-unit">kcal</p>
-    </div>
-    """, unsafe_allow_html=True)
+    rem_accent = "red" if remaining < 0 else ("amber" if remaining < 200 else "green")
+    st.markdown(_pill(f"⚡ {rem_label}", abs(remaining), "kcal", rem_accent), unsafe_allow_html=True)
 
 # Contextual insight
 if pct_consumed < 50:
@@ -209,7 +207,11 @@ elif pct_consumed < 100:
 else:
     insight = f"Daily target reached. {abs(remaining)} kcal over."
 
-st.markdown(f'<p class="insight-msg">{insight}</p>', unsafe_allow_html=True)
+st.markdown(
+    f'<p style="font-size:0.875rem;color:#64748B;text-align:center;'
+    f'padding:0.25rem 0 0.75rem;font-style:italic;">{insight}</p>',
+    unsafe_allow_html=True,
+)
 
 # ─── 3. Add Food ──────────────────────────────────────────────────────────────
 with st.expander("➕ Add Food Entry", expanded=True):
@@ -262,9 +264,10 @@ with st.expander("➕ Add Food Entry", expanded=True):
                 st.rerun()
 
 # ─── 4. Food Log ──────────────────────────────────────────────────────────────
-st.markdown("""
-<h2 style="margin:1.25rem 0 0.75rem;">📋 Today's Food Log</h2>
-""", unsafe_allow_html=True)
+st.markdown(
+    '<p style="font-size:1rem;font-weight:700;color:#0F172A;margin:1.25rem 0 0.75rem;">📋 Today\'s Food Log</p>',
+    unsafe_allow_html=True,
+)
 
 period_icons = {
     "Breakfast":      "🌅",
@@ -275,10 +278,10 @@ period_icons = {
 
 if not food_log:
     st.markdown("""
-    <div class="empty-state">
-        <div class="es-icon">🍽️</div>
-        <p class="es-title">No entries yet for this day</p>
-        <p class="es-sub">Add your first meal using the form above!</p>
+    <div style="text-align:center;padding:2.5rem 1rem;color:#94A3B8;">
+        <div style="font-size:2.5rem;margin-bottom:0.5rem;">🍽️</div>
+        <p style="font-size:1rem;font-weight:600;color:#64748B;margin:0;">No entries yet for this day</p>
+        <p style="font-size:0.82rem;margin:0.2rem 0 0;">Add your first meal using the form above!</p>
     </div>
     """, unsafe_allow_html=True)
 else:
@@ -291,10 +294,17 @@ else:
         icon = period_icons.get(period, "🍽️")
 
         st.markdown(f"""
-        <div class="meal-header">
-            <span class="mh-icon">{icon}</span>
-            <span class="mh-name">{period}</span>
-            <span class="mh-badge">{period_total} kcal</span>
+        <div style="
+            display:flex;align-items:center;gap:0.5rem;padding:0.7rem 1rem;
+            background:#FFFFFF;border-radius:10px;border:1px solid #E2E8F0;
+            margin-bottom:0.4rem;box-shadow:0 1px 3px rgba(0,0,0,0.05);
+        ">
+            <span style="font-size:1.2rem;">{icon}</span>
+            <span style="font-weight:700;color:#0F172A;font-size:0.95rem;flex:1;">{period}</span>
+            <span style="
+                background:#EEF2FF;color:#4F46E5;font-size:0.72rem;font-weight:700;
+                padding:0.2rem 0.65rem;border-radius:999px;border:1px solid #C7D2FE;
+            ">{period_total} kcal</span>
         </div>
         """, unsafe_allow_html=True)
 
@@ -302,12 +312,16 @@ else:
             row_col, del_col = st.columns([6, 1])
             with row_col:
                 st.markdown(f"""
-                <div class="food-row">
+                <div style="
+                    background:#F8FAFC;border-radius:8px;padding:0.55rem 0.9rem;
+                    margin-bottom:0.3rem;display:flex;align-items:center;
+                    justify-content:space-between;border:1px solid #E2E8F0;
+                ">
                     <div>
-                        <span class="fr-name">{entry['food_name']}</span>
-                        <span class="fr-meta">&nbsp;·&nbsp;{entry['quantity']} {entry['unit']}</span>
+                        <span style="font-weight:600;color:#0F172A;font-size:0.875rem;">{entry['food_name']}</span>
+                        <span style="font-size:0.775rem;color:#94A3B8;margin-left:0.5rem;">· {entry['quantity']} {entry['unit']}</span>
                     </div>
-                    <span class="fr-cal">{entry['total_calories']} kcal</span>
+                    <span style="font-weight:700;color:#4F46E5;font-size:0.875rem;white-space:nowrap;">{entry['total_calories']} kcal</span>
                 </div>
                 """, unsafe_allow_html=True)
             with del_col:
@@ -319,8 +333,10 @@ else:
         st.markdown("<div style='margin-bottom:1rem'></div>", unsafe_allow_html=True)
 
 # ─── 5. Charts ────────────────────────────────────────────────────────────────
-st.markdown("<h2 style='margin:1.25rem 0 0.75rem;'>📊 Visual Summary</h2>",
-            unsafe_allow_html=True)
+st.markdown(
+    '<p style="font-size:1rem;font-weight:700;color:#0F172A;margin:1.25rem 0 0.75rem;">📊 Visual Summary</p>',
+    unsafe_allow_html=True,
+)
 
 tab1, tab2 = st.tabs(["  📊  Today's Breakdown  ", "  📈  Weekly Trend  "])
 
