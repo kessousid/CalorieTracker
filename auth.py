@@ -37,6 +37,14 @@ def show_auth_page() -> dict | None:
             unsafe_allow_html=True,
         )
 
+        st.warning(
+            "**Disclaimer:** This app is a personal tool for tracking calorie consumption "
+            "only. It does not constitute medical, nutritional, or dietary advice of any kind. "
+            "The calorie values listed are approximate. I am not a dietician or food specialist. "
+            "Please consult a qualified healthcare professional for personalised dietary guidance.",
+            icon="⚠️",
+        )
+
         with st.container():
             tab_login, tab_register = st.tabs(["🔐  Sign In", "📝  Create Account"])
 

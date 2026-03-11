@@ -333,3 +333,11 @@ with st.expander("📖 Food Calorie Reference Table (658 items)"):
         ref_df = ref_df[ref_df["Category"] == filter_cat]
 
     st.dataframe(ref_df.reset_index(drop=True), use_container_width=True, height=400)
+
+st.divider()
+st.caption(
+    "⚠️ **Disclaimer:** This app is for personal calorie tracking purposes only and does not "
+    "constitute medical, nutritional, or dietary advice. Calorie values are approximate. "
+    "The developer is not a dietician or food specialist. "
+    "Consult a qualified healthcare professional for personalised dietary guidance."
+)
