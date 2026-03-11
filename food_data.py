@@ -703,6 +703,9 @@ FOOD_DATABASE = {
 
     # ─── FRUITS ───────────────────────────────────────────────────────────
     "Banana": {"calories": 90, "unit": "piece", "category": "Fruits"},
+    "Yelakki Banana": {"calories": 60, "unit": "piece", "category": "Fruits"},
+    "Nendran Banana": {"calories": 130, "unit": "piece", "category": "Fruits"},
+    "Red Banana": {"calories": 95, "unit": "piece", "category": "Fruits"},
     "Apple": {"calories": 80, "unit": "medium piece", "category": "Fruits"},
     "Orange": {"calories": 60, "unit": "piece", "category": "Fruits"},
     "Mango": {"calories": 100, "unit": "cup sliced", "category": "Fruits"},
