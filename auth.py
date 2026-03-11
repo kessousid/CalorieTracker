@@ -1,5 +1,6 @@
 import re
 import streamlit as st
+import streamlit.components.v1 as components
 import database as db
 from food_data import FOOD_DATABASE, CATEGORIES
 from styles import inject_css
@@ -25,42 +26,27 @@ def show_auth_page() -> dict | None:
 
     # ── Left: Hero panel ──────────────────────────────────────────────────────
     with left_col:
-        feature_style = (
-            "display:flex;align-items:center;gap:0.5rem;"
-            "color:#C7D2FE;font-size:0.875rem;margin-bottom:0.55rem;"
+        fs = "display:flex;align-items:center;gap:0.5rem;color:#C7D2FE;font-size:0.875rem;margin-bottom:0.6rem;"
+        cs = "color:#34D399;font-weight:800;font-size:1rem;"
+        hero_html = (
+            '<div style="background:linear-gradient(155deg,#1E1B4B 0%,#3730A3 60%,#4338CA 100%);'
+            'border-radius:16px;padding:2.5rem 2rem;min-height:480px;'
+            'display:flex;flex-direction:column;justify-content:center;color:#FFFFFF;'
+            'font-family:Inter,sans-serif;">'
+            '<div style="font-size:3rem;margin-bottom:0.5rem;">🥗</div>'
+            '<div style="font-size:1.7rem;font-weight:800;color:#FFFFFF;margin-bottom:0.25rem;line-height:1.2;">Indian Calorie Tracker</div>'
+            '<p style="color:#A5B4FC;font-size:0.875rem;margin-bottom:1.5rem;line-height:1.5;">Your personal nutrition companion — eat mindfully, live better.</p>'
+            f'<div style="{fs}"><span style="{cs}">✓</span> {len(FOOD_DATABASE)}+ Indian vegetarian foods</div>'
+            f'<div style="{fs}"><span style="{cs}">✓</span> Track Breakfast, Lunch, Dinner &amp; Snacks</div>'
+            f'<div style="{fs}"><span style="{cs}">✓</span> Weekly calorie trends &amp; visual insights</div>'
+            f'<div style="{fs}"><span style="{cs}">✓</span> Secure personal profiles &amp; history</div>'
+            '<div style="margin-top:2rem;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.15);border-radius:10px;padding:0.75rem 1rem;color:#E0E7FF;font-size:0.82rem;">'
+            f'<strong style="color:#FFFFFF;font-size:1.4rem;font-weight:800;display:block;margin-bottom:0.1rem;">{len(FOOD_DATABASE)}</strong>'
+            f'foods across {len(CATEGORIES)} categories'
+            '</div>'
+            '</div>'
         )
-        check_style = "color:#34D399;font-weight:800;font-size:1rem;"
-        st.markdown(f"""
-        <div style="
-            background:linear-gradient(155deg,#1E1B4B 0%,#3730A3 60%,#4338CA 100%);
-            border-radius:16px; padding:2.5rem 2rem; min-height:480px;
-            display:flex; flex-direction:column; justify-content:center; color:#FFFFFF;
-        ">
-            <div style="font-size:3.2rem;line-height:1;margin-bottom:0.5rem;">🥗</div>
-            <div style="font-size:1.7rem;font-weight:800;color:#FFFFFF;margin-bottom:0.2rem;line-height:1.2;">
-                Indian Calorie Tracker
-            </div>
-            <p style="color:#A5B4FC;font-size:0.875rem;margin-bottom:1.5rem;line-height:1.5;">
-                Your personal nutrition companion — eat mindfully, live better.
-            </p>
-
-            <div style="{feature_style}"><span style="{check_style}">✓</span> {len(FOOD_DATABASE)}+ Indian vegetarian foods</div>
-            <div style="{feature_style}"><span style="{check_style}">✓</span> Track Breakfast, Lunch, Dinner &amp; Snacks</div>
-            <div style="{feature_style}"><span style="{check_style}">✓</span> Weekly calorie trends &amp; visual insights</div>
-            <div style="{feature_style}"><span style="{check_style}">✓</span> Secure personal profiles &amp; history</div>
-
-            <div style="
-                margin-top:2rem;background:rgba(255,255,255,0.1);
-                border:1px solid rgba(255,255,255,0.15);border-radius:10px;
-                padding:0.75rem 1rem;color:#E0E7FF;font-size:0.82rem;
-            ">
-                <strong style="color:#FFFFFF;font-size:1.4rem;font-weight:800;display:block;margin-bottom:0.1rem;">
-                    {len(FOOD_DATABASE)}
-                </strong>
-                foods across {len(CATEGORIES)} categories
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
+        components.html(hero_html, height=500, scrolling=False)
 
     # ── Right: Form panel ─────────────────────────────────────────────────────
     with right_col:
