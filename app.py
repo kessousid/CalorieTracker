@@ -316,7 +316,7 @@ with st.expander("➕ Add Food Entry", expanded=True):
     with qty_col:
         quantity = st.number_input(
             f"Quantity ({unit})",
-            min_value=0.5, max_value=50.0, value=1.0, step=0.5,
+            min_value=0.1, max_value=50.0, value=1.0, step=0.1,
         )
     with info_col:
         total_cal     = round(quantity * cal_per_unit, 1)
@@ -406,8 +406,8 @@ else:
                     )
                     ec1, ec2, ec3, ec4 = st.columns([2, 2, 1, 1])
                     new_qty = ec1.number_input(
-                        "Quantity", min_value=0.5, max_value=50.0,
-                        value=float(entry["quantity"]), step=0.5,
+                        "Quantity", min_value=0.1, max_value=50.0,
+                        value=float(entry["quantity"]), step=0.1,
                         key=f"eq_{eid}",
                     )
                     new_period = ec2.selectbox(
