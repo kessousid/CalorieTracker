@@ -138,8 +138,13 @@ date_str      = selected_date.strftime("%Y-%m-%d")
 daily_target = db.get_daily_target(user_id, date_str)
 daily_total  = db.get_daily_total(user_id, date_str)
 remaining    = daily_target - daily_total
-meal_totals  = db.get_meal_totals(user_id, date_str)
+meal_totals  = db.get_meal_totals(user_id, date_str)   # {period: {calories,protein,carbs,fat}}
 food_log     = db.get_food_log(user_id, date_str)
+
+# Daily macro totals
+daily_protein = round(sum(m["protein"] for m in meal_totals.values()), 1)
+daily_carbs   = round(sum(m["carbs"]   for m in meal_totals.values()), 1)
+daily_fat     = round(sum(m["fat"]     for m in meal_totals.values()), 1)
 
 pct_consumed = round((daily_total / daily_target) * 100, 1) if daily_target > 0 else 0.0
 
@@ -284,20 +289,26 @@ with st.expander("➕ Add Food Entry", expanded=True):
 
     # Custom food inputs when "Others" is chosen
     if selected_food == _OTHERS:
-        cf1, cf2 = st.columns(2)
+        cf1, cf2, cf3, cf4 = st.columns(4)
         custom_food_name = cf1.text_input(
             "Food Name", placeholder="e.g. Homemade Khichdi", key="custom_food_name"
         )
-        custom_cal = cf2.number_input(
-            "Calories per serving (kcal)", min_value=1, max_value=5000, value=200, step=5,
-            key="custom_cal"
-        )
+        custom_cal     = cf2.number_input("Calories (kcal)", min_value=0, max_value=5000, value=200, step=5, key="custom_cal")
+        custom_protein = cf3.number_input("Protein (g)",   min_value=0.0, max_value=200.0, value=0.0, step=0.5, key="custom_protein")
+        custom_carbs   = cf3.number_input("Carbs (g)",     min_value=0.0, max_value=500.0, value=0.0, step=0.5, key="custom_carbs")
+        custom_fat     = cf4.number_input("Fat (g)",       min_value=0.0, max_value=200.0, value=0.0, step=0.5, key="custom_fat")
         food_name_to_log = custom_food_name.strip() if custom_food_name.strip() else ""
-        cal_per_unit = float(custom_cal)
+        cal_per_unit  = float(custom_cal)
+        protein_per_unit = float(custom_protein)
+        carbs_per_unit   = float(custom_carbs)
+        fat_per_unit     = float(custom_fat)
         unit = "serving"
     else:
         food_info        = get_food_info(selected_food)
         cal_per_unit     = food_info.get("calories", 0)
+        protein_per_unit = food_info.get("protein", 0.0)
+        carbs_per_unit   = food_info.get("carbs", 0.0)
+        fat_per_unit     = food_info.get("fat", 0.0)
         unit             = food_info.get("unit", "serving")
         food_name_to_log = selected_food
 
@@ -308,10 +319,15 @@ with st.expander("➕ Add Food Entry", expanded=True):
             min_value=0.5, max_value=50.0, value=1.0, step=0.5,
         )
     with info_col:
-        total_cal = round(quantity * cal_per_unit, 1)
+        total_cal     = round(quantity * cal_per_unit, 1)
+        total_protein = round(quantity * protein_per_unit, 1)
+        total_carbs   = round(quantity * carbs_per_unit, 1)
+        total_fat     = round(quantity * fat_per_unit, 1)
         st.info(
-            f"**{cal_per_unit} kcal** per {unit}  \n"
-            f"**Total for this entry: {total_cal} kcal**"
+            f"**{total_cal} kcal** &nbsp;|&nbsp; "
+            f"P: {total_protein}g &nbsp;|&nbsp; "
+            f"C: {total_carbs}g &nbsp;|&nbsp; "
+            f"F: {total_fat}g"
         )
     with btn_col:
         st.markdown("<br>", unsafe_allow_html=True)
@@ -320,6 +336,7 @@ with st.expander("➕ Add Food Entry", expanded=True):
             db.add_food_entry(
                 user_id, date_str, meal_period,
                 food_name_to_log, quantity, unit, cal_per_unit,
+                protein_per_unit, carbs_per_unit, fat_per_unit,
             )
             st.toast(f"Added {food_name_to_log} to {meal_period} — {total_cal} kcal", icon="✅")
             st.rerun()
@@ -351,21 +368,29 @@ else:
         if not period_entries:
             continue
 
-        period_total = meal_totals.get(period, 0)
+        pm = meal_totals.get(period, {"calories": 0, "protein": 0, "carbs": 0, "fat": 0})
         icon = period_icons.get(period, "🍽️")
+
+        def _badge(label, val, color):
+            return (f'<span style="background:{color}18;color:{color};font-size:0.68rem;'
+                    f'font-weight:700;padding:0.15rem 0.55rem;border-radius:999px;'
+                    f'border:1px solid {color}40;white-space:nowrap;">'
+                    f'{label} {val}g</span>')
 
         st.markdown(f"""
         <div style="
             display:flex;align-items:center;gap:0.5rem;padding:0.7rem 1rem;
             background:#FFFFFF;border-radius:10px;border:1px solid #E2E8F0;
-            margin-bottom:0.4rem;box-shadow:0 1px 3px rgba(0,0,0,0.05);
+            margin-bottom:0.4rem;box-shadow:0 1px 3px rgba(0,0,0,0.05);flex-wrap:wrap;
         ">
             <span style="font-size:1.2rem;">{icon}</span>
             <span style="font-weight:700;color:#0F172A;font-size:0.95rem;flex:1;">{period}</span>
-            <span style="
-                background:#EEF2FF;color:#4F46E5;font-size:0.72rem;font-weight:700;
+            <span style="background:#EEF2FF;color:#4F46E5;font-size:0.72rem;font-weight:700;
                 padding:0.2rem 0.65rem;border-radius:999px;border:1px solid #C7D2FE;
-            ">{period_total} kcal</span>
+                white-space:nowrap;">{pm['calories']} kcal</span>
+            {_badge('P', pm['protein'], '#10B981')}
+            {_badge('C', pm['carbs'],   '#F59E0B')}
+            {_badge('F', pm['fat'],     '#EF4444')}
         </div>
         """, unsafe_allow_html=True)
 
@@ -380,7 +405,12 @@ else:
                 ">
                     <div>
                         <span style="font-weight:600;color:#0F172A;font-size:0.875rem;">{entry['food_name']}</span>
-                        <span style="font-size:0.775rem;color:#94A3B8;margin-left:0.5rem;">· {entry['quantity']} {entry['unit']}</span>
+                        <span style="font-size:0.775rem;color:#94A3B8;margin-left:0.5rem;">
+                            · {entry['quantity']} {entry['unit']}
+                        </span>
+                        <span style="font-size:0.72rem;color:#64748B;margin-left:0.75rem;">
+                            P:{entry['protein']}g &nbsp; C:{entry['carbs']}g &nbsp; F:{entry['fat']}g
+                        </span>
                     </div>
                     <span style="font-weight:700;color:#4F46E5;font-size:0.875rem;white-space:nowrap;">{entry['total_calories']} kcal</span>
                 </div>
@@ -408,7 +438,7 @@ with tab1:
         if meal_totals:
             fig_pie = go.Figure(data=[go.Pie(
                 labels=list(meal_totals.keys()),
-                values=list(meal_totals.values()),
+                values=[v["calories"] for v in meal_totals.values()],
                 hole=0.45,
                 marker=dict(colors=["#4F46E5", "#10B981", "#F59E0B", "#EC4899"]),
                 textfont=dict(family="Inter", size=12),
@@ -448,6 +478,32 @@ with tab1:
             yaxis=dict(gridcolor="#F1F5F9"),
         )
         st.plotly_chart(fig_bar, use_container_width=True, config={"displayModeBar": False})
+
+    # Macro breakdown row
+    if daily_protein or daily_carbs or daily_fat:
+        st.markdown("**Today's Macro Breakdown**")
+        fig_macro = go.Figure()
+        macro_labels = ["Protein", "Carbs", "Fat"]
+        macro_vals   = [daily_protein, daily_carbs, daily_fat]
+        macro_colors = ["#10B981", "#F59E0B", "#EF4444"]
+        for label, val, color in zip(macro_labels, macro_vals, macro_colors):
+            fig_macro.add_trace(go.Bar(
+                name=label, x=["Macros"], y=[val],
+                marker_color=color,
+                text=[f"{val}g"], textposition="inside",
+                textfont=dict(color="#FFFFFF", size=12, family="Inter"),
+            ))
+        fig_macro.update_layout(
+            barmode="stack", height=120,
+            margin=dict(t=5, b=5, l=5, r=5),
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="rgba(0,0,0,0)",
+            legend=dict(orientation="h", yanchor="bottom", y=1.05, font=dict(family="Inter", size=11)),
+            xaxis=dict(showticklabels=False),
+            yaxis=dict(showticklabels=False, showgrid=False),
+        )
+        st.plotly_chart(fig_macro, use_container_width=True, config={"displayModeBar": False})
+        st.caption(f"Protein: {daily_protein}g · Carbs: {daily_carbs}g · Fat: {daily_fat}g")
 
 with tab2:
     weekly_data = db.get_weekly_summary(user_id, date_str)

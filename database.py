@@ -9,7 +9,7 @@ os.makedirs(_DATA_DIR, exist_ok=True)
 DB_PATH = os.path.join(_DATA_DIR, "calorie_tracker.db")
 
 # Schema version: bump when tables change incompatibly
-SCHEMA_VERSION = 5
+SCHEMA_VERSION = 6
 
 
 def get_connection():
@@ -81,6 +81,13 @@ def _migrate(conn, from_version: int):
             conn.execute("ALTER TABLE users ADD COLUMN role TEXT NOT NULL DEFAULT 'user'")
         except Exception:
             pass  # column already exists
+
+    if from_version < 6:
+        for col_def in ["protein REAL DEFAULT 0", "carbs REAL DEFAULT 0", "fat REAL DEFAULT 0"]:
+            try:
+                conn.execute(f"ALTER TABLE food_log ADD COLUMN {col_def}")
+            except Exception:
+                pass  # column already exists
 
     conn.execute("""
         CREATE TABLE IF NOT EXISTS daily_settings (
@@ -256,16 +263,22 @@ def get_daily_target(user_id: int, target_date: str) -> int:
 
 def add_food_entry(user_id: int, log_date: str, meal_period: str,
                    food_name: str, quantity: float, unit: str,
-                   calories_per_unit: float) -> float:
+                   calories_per_unit: float,
+                   protein_per_unit: float = 0.0,
+                   carbs_per_unit: float = 0.0,
+                   fat_per_unit: float = 0.0) -> float:
     total = round(quantity * calories_per_unit, 1)
     with get_connection() as conn:
         conn.execute("""
             INSERT INTO food_log
                 (user_id, date, meal_period, food_name, quantity, unit,
-                 calories_per_unit, total_calories)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                 calories_per_unit, total_calories, protein, carbs, fat)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, (user_id, log_date, meal_period, food_name,
-              quantity, unit, calories_per_unit, total))
+              quantity, unit, calories_per_unit, total,
+              round(quantity * protein_per_unit, 1),
+              round(quantity * carbs_per_unit, 1),
+              round(quantity * fat_per_unit, 1)))
         conn.commit()
     return total
 
@@ -284,7 +297,8 @@ def get_food_log(user_id: int, log_date: str) -> list[dict]:
     with get_connection() as conn:
         rows = conn.execute("""
             SELECT id, meal_period, food_name, quantity, unit,
-                   calories_per_unit, total_calories
+                   calories_per_unit, total_calories,
+                   COALESCE(protein, 0), COALESCE(carbs, 0), COALESCE(fat, 0)
             FROM food_log
             WHERE user_id = ? AND date = ?
             ORDER BY id
@@ -294,20 +308,34 @@ def get_food_log(user_id: int, log_date: str) -> list[dict]:
             "id": r[0], "meal_period": r[1], "food_name": r[2],
             "quantity": r[3], "unit": r[4],
             "calories_per_unit": r[5], "total_calories": r[6],
+            "protein": r[7], "carbs": r[8], "fat": r[9],
         }
         for r in rows
     ]
 
 
 def get_meal_totals(user_id: int, log_date: str) -> dict:
+    """Returns {meal_period: {calories, protein, carbs, fat}}."""
     with get_connection() as conn:
         rows = conn.execute("""
-            SELECT meal_period, SUM(total_calories)
+            SELECT meal_period,
+                   SUM(total_calories),
+                   SUM(COALESCE(protein, 0)),
+                   SUM(COALESCE(carbs, 0)),
+                   SUM(COALESCE(fat, 0))
             FROM food_log
             WHERE user_id = ? AND date = ?
             GROUP BY meal_period
         """, (user_id, log_date)).fetchall()
-    return {r[0]: round(r[1], 1) for r in rows}
+    return {
+        r[0]: {
+            "calories": round(r[1], 1),
+            "protein":  round(r[2], 1),
+            "carbs":    round(r[3], 1),
+            "fat":      round(r[4], 1),
+        }
+        for r in rows
+    }
 
 
 def get_daily_total(user_id: int, log_date: str) -> float:

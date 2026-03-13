@@ -816,4 +816,7 @@ def get_all_food_names() -> list:
     return sorted(FOOD_DATABASE.keys())
 
 def get_food_info(food_name: str) -> dict:
-    return FOOD_DATABASE.get(food_name, {})
+    from macro_data import get_macros
+    info = FOOD_DATABASE.get(food_name, {}).copy()
+    info.update(get_macros(food_name))
+    return info
