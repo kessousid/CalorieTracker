@@ -395,31 +395,67 @@ else:
         """, unsafe_allow_html=True)
 
         for entry in period_entries:
-            row_col, del_col = st.columns([6, 1])
-            with row_col:
-                st.markdown(f"""
-                <div style="
-                    background:#F8FAFC;border-radius:8px;padding:0.55rem 0.9rem;
-                    margin-bottom:0.3rem;display:flex;align-items:center;
-                    justify-content:space-between;border:1px solid #E2E8F0;
-                ">
-                    <div>
-                        <span style="font-weight:600;color:#0F172A;font-size:0.875rem;">{entry['food_name']}</span>
-                        <span style="font-size:0.775rem;color:#94A3B8;margin-left:0.5rem;">
-                            · {entry['quantity']} {entry['unit']}
-                        </span>
-                        <span style="font-size:0.72rem;color:#64748B;margin-left:0.75rem;">
-                            P:{entry['protein']}g &nbsp; C:{entry['carbs']}g &nbsp; F:{entry['fat']}g
-                        </span>
+            eid = entry["id"]
+            if st.session_state.get("editing_id") == eid:
+                # ── Inline edit form ──────────────────────────────────────
+                with st.container():
+                    st.markdown(
+                        f'<p style="font-size:0.82rem;font-weight:700;color:#4F46E5;margin:0.3rem 0 0.2rem;">'
+                        f'Editing: {entry["food_name"]}</p>',
+                        unsafe_allow_html=True,
+                    )
+                    ec1, ec2, ec3, ec4 = st.columns([2, 2, 1, 1])
+                    new_qty = ec1.number_input(
+                        "Quantity", min_value=0.5, max_value=50.0,
+                        value=float(entry["quantity"]), step=0.5,
+                        key=f"eq_{eid}",
+                    )
+                    new_period = ec2.selectbox(
+                        "Meal Period", MEAL_PERIODS,
+                        index=MEAL_PERIODS.index(entry["meal_period"]),
+                        key=f"ep_{eid}",
+                    )
+                    ec3.markdown("<br>", unsafe_allow_html=True)
+                    if ec3.button("Save", key=f"esave_{eid}", type="primary"):
+                        db.update_food_entry(eid, user_id, new_qty, new_period)
+                        del st.session_state["editing_id"]
+                        st.rerun()
+                    ec4.markdown("<br>", unsafe_allow_html=True)
+                    if ec4.button("Cancel", key=f"ecancel_{eid}"):
+                        del st.session_state["editing_id"]
+                        st.rerun()
+            else:
+                # ── Normal display row ────────────────────────────────────
+                row_col, edit_col, del_col = st.columns([6, 1, 1])
+                with row_col:
+                    st.markdown(f"""
+                    <div style="
+                        background:#F8FAFC;border-radius:8px;padding:0.55rem 0.9rem;
+                        margin-bottom:0.3rem;display:flex;align-items:center;
+                        justify-content:space-between;border:1px solid #E2E8F0;
+                    ">
+                        <div>
+                            <span style="font-weight:600;color:#0F172A;font-size:0.875rem;">{entry['food_name']}</span>
+                            <span style="font-size:0.775rem;color:#94A3B8;margin-left:0.5rem;">
+                                · {entry['quantity']} {entry['unit']}
+                            </span>
+                            <span style="font-size:0.72rem;color:#64748B;margin-left:0.75rem;">
+                                P:{entry['protein']}g &nbsp; C:{entry['carbs']}g &nbsp; F:{entry['fat']}g
+                            </span>
+                        </div>
+                        <span style="font-weight:700;color:#4F46E5;font-size:0.875rem;white-space:nowrap;">{entry['total_calories']} kcal</span>
                     </div>
-                    <span style="font-weight:700;color:#4F46E5;font-size:0.875rem;white-space:nowrap;">{entry['total_calories']} kcal</span>
-                </div>
-                """, unsafe_allow_html=True)
-            with del_col:
-                st.markdown("<div style='padding-top:0.3rem'></div>", unsafe_allow_html=True)
-                if st.button("✕", key=f"del_{entry['id']}", help="Remove entry"):
-                    db.delete_food_entry(entry["id"], user_id)
-                    st.rerun()
+                    """, unsafe_allow_html=True)
+                with edit_col:
+                    st.markdown("<div style='padding-top:0.3rem'></div>", unsafe_allow_html=True)
+                    if st.button("✏️", key=f"edit_{eid}", help="Edit entry"):
+                        st.session_state["editing_id"] = eid
+                        st.rerun()
+                with del_col:
+                    st.markdown("<div style='padding-top:0.3rem'></div>", unsafe_allow_html=True)
+                    if st.button("✕", key=f"del_{eid}", help="Remove entry"):
+                        db.delete_food_entry(eid, user_id)
+                        st.rerun()
 
         st.markdown("<div style='margin-bottom:1rem'></div>", unsafe_allow_html=True)
 

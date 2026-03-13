@@ -293,6 +293,38 @@ def delete_food_entry(entry_id: int, user_id: int):
         conn.commit()
 
 
+def update_food_entry(entry_id: int, user_id: int,
+                      new_quantity: float, new_meal_period: str):
+    """Update quantity and meal period; recalculate totals from stored per-unit values."""
+    with get_connection() as conn:
+        row = conn.execute(
+            "SELECT quantity, calories_per_unit, protein, carbs, fat "
+            "FROM food_log WHERE id = ? AND user_id = ?",
+            (entry_id, user_id)
+        ).fetchone()
+        if not row:
+            return
+        old_qty, cal_per_unit, old_protein, old_carbs, old_fat = row
+        # Derive per-unit macros from currently stored totals
+        ppu = old_protein / old_qty if old_qty else 0.0
+        cpu = old_carbs   / old_qty if old_qty else 0.0
+        fpu = old_fat     / old_qty if old_qty else 0.0
+        conn.execute("""
+            UPDATE food_log
+            SET quantity=?, meal_period=?,
+                total_calories=?, protein=?, carbs=?, fat=?
+            WHERE id=? AND user_id=?
+        """, (
+            new_quantity, new_meal_period,
+            round(new_quantity * cal_per_unit, 1),
+            round(new_quantity * ppu, 1),
+            round(new_quantity * cpu, 1),
+            round(new_quantity * fpu, 1),
+            entry_id, user_id,
+        ))
+        conn.commit()
+
+
 def get_food_log(user_id: int, log_date: str) -> list[dict]:
     with get_connection() as conn:
         rows = conn.execute("""
