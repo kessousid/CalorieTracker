@@ -83,6 +83,25 @@ def _migrate(conn, from_version: int):
             pass  # column already exists
 
     if from_version < 6:
+        # Ensure food_log exists before altering (handles fresh installs where
+        # CREATE TABLE hasn't run yet but migration is triggered)
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS food_log (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                date TEXT NOT NULL,
+                meal_period TEXT NOT NULL,
+                food_name TEXT NOT NULL,
+                quantity REAL NOT NULL,
+                unit TEXT NOT NULL,
+                calories_per_unit REAL NOT NULL,
+                total_calories REAL NOT NULL,
+                protein REAL DEFAULT 0,
+                carbs REAL DEFAULT 0,
+                fat REAL DEFAULT 0,
+                FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+            )
+        """)
         for col_def in ["protein REAL DEFAULT 0", "carbs REAL DEFAULT 0", "fat REAL DEFAULT 0"]:
             try:
                 conn.execute(f"ALTER TABLE food_log ADD COLUMN {col_def}")
@@ -110,6 +129,9 @@ def _migrate(conn, from_version: int):
             unit TEXT NOT NULL,
             calories_per_unit REAL NOT NULL,
             total_calories REAL NOT NULL,
+            protein REAL DEFAULT 0,
+            carbs REAL DEFAULT 0,
+            fat REAL DEFAULT 0,
             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
         )
     """)
