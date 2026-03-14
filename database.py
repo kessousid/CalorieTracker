@@ -9,7 +9,7 @@ os.makedirs(_DATA_DIR, exist_ok=True)
 DB_PATH = os.path.join(_DATA_DIR, "calorie_tracker.db")
 
 # Schema version: bump when tables change incompatibly
-SCHEMA_VERSION = 6
+SCHEMA_VERSION = 7
 
 
 def get_connection():
@@ -81,6 +81,15 @@ def _migrate(conn, from_version: int):
             conn.execute("ALTER TABLE users ADD COLUMN role TEXT NOT NULL DEFAULT 'user'")
         except Exception:
             pass  # column already exists
+
+    if from_version < 7:
+        # Re-apply macro columns in case v6 migration ran on a DB where
+        # food_log already existed without them (ALTER TABLE was silently skipped)
+        for col_def in ["protein REAL DEFAULT 0", "carbs REAL DEFAULT 0", "fat REAL DEFAULT 0"]:
+            try:
+                conn.execute(f"ALTER TABLE food_log ADD COLUMN {col_def}")
+            except Exception:
+                pass  # column already exists — safe to ignore
 
     if from_version < 6:
         # Ensure food_log exists before altering (handles fresh installs where
