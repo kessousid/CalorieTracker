@@ -13,8 +13,8 @@ from food_data import (
 
 # ─── Page Config ──────────────────────────────────────────────────────────────
 st.set_page_config(
-    page_title="Indian Calorie Tracker",
-    page_icon="🥗",
+    page_title="Global Calorie Tracker",
+    page_icon="🌍",
     layout="wide",
     initial_sidebar_state="expanded",
 )
@@ -40,7 +40,7 @@ if "nav_date" not in st.session_state:
 # ─── Sidebar ──────────────────────────────────────────────────────────────────
 with st.sidebar:
     st.markdown("🥗 **Calorie Tracker**")
-    st.caption("Admin Panel" if is_superadmin else "Indian Vegetarian Edition")
+    st.caption("Admin Panel" if is_superadmin else "Global Edition")
     st.divider()
     show_sidebar_user(user)
 
