@@ -29,7 +29,18 @@ def init_db():
         row = conn.execute(
             "SELECT value FROM schema_meta WHERE key='version'"
         ).fetchone()
-        current = int(row[0]) if row else 0
+        if row:
+            current = int(row[0])
+        else:
+            # schema_meta version row is missing — inspect table structure
+            # to avoid wiping accounts that were already created
+            current = _detect_actual_version(conn)
+            if current > 0:
+                # Restore the version row so future startups are safe
+                conn.execute(
+                    "INSERT OR REPLACE INTO schema_meta (key, value) VALUES ('version', ?)",
+                    (str(current),)
+                )
 
         if current < SCHEMA_VERSION:
             _migrate(conn, current)
@@ -41,12 +52,60 @@ def init_db():
     _ensure_superadmin()
 
 
+def _detect_actual_version(conn) -> int:
+    """
+    Inspect the live table structure to determine the real schema version.
+    Called when schema_meta has no version row (e.g. meta row was lost).
+    Returns the highest version whose schema is fully satisfied.
+    """
+    try:
+        users_cols = {r[1] for r in conn.execute("PRAGMA table_info(users)").fetchall()}
+    except Exception:
+        users_cols = set()
+
+    if not users_cols:
+        return 0  # No users table at all → fresh DB
+
+    # v3 added password_hash + salt + user_id on food_log
+    if "password_hash" not in users_cols:
+        return 2  # Pre-auth schema
+
+    # v4 added health profile columns
+    if "age" not in users_cols:
+        return 3
+
+    # v5 added role column
+    if "role" not in users_cols:
+        return 4
+
+    # v6 added macro columns to food_log
+    try:
+        food_cols = {r[1] for r in conn.execute("PRAGMA table_info(food_log)").fetchall()}
+    except Exception:
+        food_cols = set()
+
+    if "protein" not in food_cols:
+        return 5
+
+    # v7 was a re-application of macro columns; structure is same as v6
+    return 7
+
+
 def _migrate(conn, from_version: int):
     if from_version < 3:
-        # Drop old tables that lack user_id — data from v1/v2 is discarded
-        conn.execute("DROP TABLE IF EXISTS food_log")
-        conn.execute("DROP TABLE IF EXISTS daily_settings")
-        conn.execute("DROP TABLE IF EXISTS users")
+        # Only drop truly old tables (pre-auth schema without password_hash).
+        # If password_hash already exists the table is v3+ — schema_meta just
+        # lost its version row, so we must NOT wipe user accounts.
+        try:
+            users_cols = {r[1] for r in conn.execute("PRAGMA table_info(users)").fetchall()}
+        except Exception:
+            users_cols = set()
+
+        if "password_hash" not in users_cols:
+            # Genuinely old schema — safe to drop and rebuild
+            conn.execute("DROP TABLE IF EXISTS food_log")
+            conn.execute("DROP TABLE IF EXISTS daily_settings")
+            conn.execute("DROP TABLE IF EXISTS users")
 
     conn.execute("""
         CREATE TABLE IF NOT EXISTS users (
@@ -82,15 +141,6 @@ def _migrate(conn, from_version: int):
         except Exception:
             pass  # column already exists
 
-    if from_version < 7:
-        # Re-apply macro columns in case v6 migration ran on a DB where
-        # food_log already existed without them (ALTER TABLE was silently skipped)
-        for col_def in ["protein REAL DEFAULT 0", "carbs REAL DEFAULT 0", "fat REAL DEFAULT 0"]:
-            try:
-                conn.execute(f"ALTER TABLE food_log ADD COLUMN {col_def}")
-            except Exception:
-                pass  # column already exists — safe to ignore
-
     if from_version < 6:
         # Ensure food_log exists before altering (handles fresh installs where
         # CREATE TABLE hasn't run yet but migration is triggered)
@@ -116,6 +166,15 @@ def _migrate(conn, from_version: int):
                 conn.execute(f"ALTER TABLE food_log ADD COLUMN {col_def}")
             except Exception:
                 pass  # column already exists
+
+    if from_version < 7:
+        # Re-apply macro columns in case v6 migration ran on a DB where
+        # food_log already existed without them (ALTER TABLE was silently skipped)
+        for col_def in ["protein REAL DEFAULT 0", "carbs REAL DEFAULT 0", "fat REAL DEFAULT 0"]:
+            try:
+                conn.execute(f"ALTER TABLE food_log ADD COLUMN {col_def}")
+            except Exception:
+                pass  # column already exists — safe to ignore
 
     conn.execute("""
         CREATE TABLE IF NOT EXISTS daily_settings (
