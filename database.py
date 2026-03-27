@@ -1,114 +1,191 @@
-import sqlite3
 import os
 import hashlib
 import secrets
-from datetime import date
+from datetime import date, datetime, timedelta
 
-# If DB_PATH env var is set (e.g. Railway volume mount), use it directly.
-# Otherwise fall back to ~/.calorie_tracker_data/ for local development.
-if os.environ.get("DB_PATH"):
-    DB_PATH = os.environ["DB_PATH"]
-    os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
+# ── Backend selection ──────────────────────────────────────────────────────────
+# Railway automatically injects DATABASE_URL when a Postgres addon is linked.
+# Without it the app falls back to a local SQLite file (local development).
+DATABASE_URL = os.environ.get("DATABASE_URL")
+_USE_PG = bool(DATABASE_URL)
+
+if _USE_PG:
+    import psycopg2
 else:
-    _DATA_DIR = os.path.join(os.path.expanduser("~"), ".calorie_tracker_data")
-    os.makedirs(_DATA_DIR, exist_ok=True)
-    DB_PATH = os.path.join(_DATA_DIR, "calorie_tracker.db")
+    import sqlite3
+    if os.environ.get("DB_PATH"):
+        DB_PATH = os.environ["DB_PATH"]
+        _dir = os.path.dirname(DB_PATH)
+        if _dir:
+            os.makedirs(_dir, exist_ok=True)
+    else:
+        _DATA_DIR = os.path.join(os.path.expanduser("~"), ".calorie_tracker_data")
+        os.makedirs(_DATA_DIR, exist_ok=True)
+        DB_PATH = os.path.join(_DATA_DIR, "calorie_tracker.db")
 
-# Schema version: bump when tables change incompatibly
 SCHEMA_VERSION = 7
 
 
-def get_connection():
-    conn = sqlite3.connect(DB_PATH)
-    conn.execute("PRAGMA foreign_keys = ON")
-    return conn
+def _p(sql: str) -> str:
+    """Convert ? placeholders to %s for psycopg2."""
+    return sql.replace("?", "%s") if _USE_PG else sql
 
+
+class _Conn:
+    """Thin wrapper that gives sqlite3 and psycopg2 a unified interface."""
+
+    def __init__(self):
+        if _USE_PG:
+            self._c = psycopg2.connect(DATABASE_URL)
+        else:
+            self._c = sqlite3.connect(DB_PATH)
+            self._c.execute("PRAGMA foreign_keys = ON")
+
+    def execute(self, sql: str, params=()):
+        if _USE_PG:
+            cur = self._c.cursor()
+            if params:
+                cur.execute(sql, params)
+            else:
+                cur.execute(sql)
+            return cur
+        return self._c.execute(sql, params)
+
+    def commit(self):   self._c.commit()
+    def rollback(self): self._c.rollback()
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, *_):
+        try:
+            self._c.rollback() if exc_type else self._c.commit()
+        finally:
+            self._c.close()
+
+
+def get_connection() -> _Conn:
+    return _Conn()
+
+
+# ── Schema initialisation ──────────────────────────────────────────────────────
 
 def init_db():
     with get_connection() as conn:
-        conn.execute("""
-            CREATE TABLE IF NOT EXISTS schema_meta (
-                key TEXT PRIMARY KEY,
-                value TEXT
-            )
-        """)
-        row = conn.execute(
-            "SELECT value FROM schema_meta WHERE key='version'"
-        ).fetchone()
-        if row:
-            current = int(row[0])
+        if _USE_PG:
+            _init_pg(conn)
         else:
-            # schema_meta version row is missing — inspect table structure
-            # to avoid wiping accounts that were already created
-            current = _detect_actual_version(conn)
-            if current > 0:
-                # Restore the version row so future startups are safe
-                conn.execute(
-                    "INSERT OR REPLACE INTO schema_meta (key, value) VALUES ('version', ?)",
-                    (str(current),)
-                )
-
-        if current < SCHEMA_VERSION:
-            _migrate(conn, current)
-            conn.execute("""
-                INSERT OR REPLACE INTO schema_meta (key, value)
-                VALUES ('version', ?)
-            """, (str(SCHEMA_VERSION),))
-        conn.commit()
+            _init_sqlite(conn)
     _ensure_superadmin()
 
 
-def _detect_actual_version(conn) -> int:
-    """
-    Inspect the live table structure to determine the real schema version.
-    Called when schema_meta has no version row (e.g. meta row was lost).
-    Returns the highest version whose schema is fully satisfied.
-    """
+def _init_pg(conn):
+    """Create all tables for a PostgreSQL database (idempotent)."""
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS users (
+            id SERIAL PRIMARY KEY,
+            username TEXT UNIQUE NOT NULL,
+            email TEXT UNIQUE NOT NULL,
+            name TEXT NOT NULL,
+            password_hash TEXT NOT NULL,
+            salt TEXT NOT NULL,
+            default_target INTEGER NOT NULL DEFAULT 2000,
+            age INTEGER,
+            weight_kg REAL,
+            height_cm REAL,
+            sex TEXT,
+            activity_level TEXT,
+            calorie_need INTEGER,
+            role TEXT NOT NULL DEFAULT 'user',
+            created_at TIMESTAMP DEFAULT NOW()
+        )
+    """)
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS daily_settings (
+            user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+            date TEXT NOT NULL,
+            calorie_target INTEGER NOT NULL DEFAULT 2000,
+            PRIMARY KEY (user_id, date)
+        )
+    """)
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS food_log (
+            id SERIAL PRIMARY KEY,
+            user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+            date TEXT NOT NULL,
+            meal_period TEXT NOT NULL,
+            food_name TEXT NOT NULL,
+            quantity REAL NOT NULL,
+            unit TEXT NOT NULL,
+            calories_per_unit REAL NOT NULL,
+            total_calories REAL NOT NULL,
+            protein REAL DEFAULT 0,
+            carbs REAL DEFAULT 0,
+            fat REAL DEFAULT 0
+        )
+    """)
+    conn.execute("CREATE INDEX IF NOT EXISTS idx_food_log_user_date ON food_log(user_id, date)")
+    conn.execute("CREATE INDEX IF NOT EXISTS idx_settings_user_date ON daily_settings(user_id, date)")
+
+
+def _init_sqlite(conn):
+    """Initialise / migrate the SQLite schema, preserving all existing data."""
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS schema_meta (
+            key TEXT PRIMARY KEY,
+            value TEXT
+        )
+    """)
+    row = conn.execute(
+        "SELECT value FROM schema_meta WHERE key='version'"
+    ).fetchone()
+    if row:
+        current = int(row[0])
+    else:
+        current = _detect_actual_version_sqlite(conn)
+        if current > 0:
+            conn.execute(
+                "INSERT OR REPLACE INTO schema_meta (key, value) VALUES ('version', ?)",
+                (str(current),)
+            )
+
+    if current < SCHEMA_VERSION:
+        _migrate_sqlite(conn, current)
+        conn.execute(
+            "INSERT OR REPLACE INTO schema_meta (key, value) VALUES ('version', ?)",
+            (str(SCHEMA_VERSION),)
+        )
+
+
+def _detect_actual_version_sqlite(conn) -> int:
     try:
         users_cols = {r[1] for r in conn.execute("PRAGMA table_info(users)").fetchall()}
     except Exception:
         users_cols = set()
-
     if not users_cols:
-        return 0  # No users table at all → fresh DB
-
-    # v3 added password_hash + salt + user_id on food_log
+        return 0
     if "password_hash" not in users_cols:
-        return 2  # Pre-auth schema
-
-    # v4 added health profile columns
+        return 2
     if "age" not in users_cols:
         return 3
-
-    # v5 added role column
     if "role" not in users_cols:
         return 4
-
-    # v6 added macro columns to food_log
     try:
         food_cols = {r[1] for r in conn.execute("PRAGMA table_info(food_log)").fetchall()}
     except Exception:
         food_cols = set()
-
     if "protein" not in food_cols:
         return 5
-
-    # v7 was a re-application of macro columns; structure is same as v6
     return 7
 
 
-def _migrate(conn, from_version: int):
+def _migrate_sqlite(conn, from_version: int):
     if from_version < 3:
-        # Only drop truly old tables (pre-auth schema without password_hash).
-        # If password_hash already exists the table is v3+ — schema_meta just
-        # lost its version row, so we must NOT wipe user accounts.
         try:
             users_cols = {r[1] for r in conn.execute("PRAGMA table_info(users)").fetchall()}
         except Exception:
             users_cols = set()
-
         if "password_hash" not in users_cols:
-            # Genuinely old schema — safe to drop and rebuild
             conn.execute("DROP TABLE IF EXISTS food_log")
             conn.execute("DROP TABLE IF EXISTS daily_settings")
             conn.execute("DROP TABLE IF EXISTS users")
@@ -127,29 +204,20 @@ def _migrate(conn, from_version: int):
     """)
 
     if from_version < 4:
-        # Add health profile columns non-destructively
-        for col_def in [
-            "age INTEGER",
-            "weight_kg REAL",
-            "height_cm REAL",
-            "sex TEXT",
-            "activity_level TEXT",
-            "calorie_need INTEGER",
-        ]:
+        for col_def in ["age INTEGER", "weight_kg REAL", "height_cm REAL",
+                        "sex TEXT", "activity_level TEXT", "calorie_need INTEGER"]:
             try:
                 conn.execute(f"ALTER TABLE users ADD COLUMN {col_def}")
             except Exception:
-                pass  # column already exists
+                pass
 
     if from_version < 5:
         try:
             conn.execute("ALTER TABLE users ADD COLUMN role TEXT NOT NULL DEFAULT 'user'")
         except Exception:
-            pass  # column already exists
+            pass
 
     if from_version < 6:
-        # Ensure food_log exists before altering (handles fresh installs where
-        # CREATE TABLE hasn't run yet but migration is triggered)
         conn.execute("""
             CREATE TABLE IF NOT EXISTS food_log (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -171,16 +239,14 @@ def _migrate(conn, from_version: int):
             try:
                 conn.execute(f"ALTER TABLE food_log ADD COLUMN {col_def}")
             except Exception:
-                pass  # column already exists
+                pass
 
     if from_version < 7:
-        # Re-apply macro columns in case v6 migration ran on a DB where
-        # food_log already existed without them (ALTER TABLE was silently skipped)
         for col_def in ["protein REAL DEFAULT 0", "carbs REAL DEFAULT 0", "fat REAL DEFAULT 0"]:
             try:
                 conn.execute(f"ALTER TABLE food_log ADD COLUMN {col_def}")
             except Exception:
-                pass  # column already exists — safe to ignore
+                pass
 
     conn.execute("""
         CREATE TABLE IF NOT EXISTS daily_settings (
@@ -191,7 +257,6 @@ def _migrate(conn, from_version: int):
             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
         )
     """)
-
     conn.execute("""
         CREATE TABLE IF NOT EXISTS food_log (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -209,18 +274,17 @@ def _migrate(conn, from_version: int):
             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
         )
     """)
-
     conn.execute("CREATE INDEX IF NOT EXISTS idx_food_log_user_date ON food_log(user_id, date)")
     conn.execute("CREATE INDEX IF NOT EXISTS idx_settings_user_date ON daily_settings(user_id, date)")
 
 
-# ─── Superadmin bootstrap ─────────────────────────────────────────────────────
+# ── Superadmin bootstrap ───────────────────────────────────────────────────────
 
 _SUPERADMIN_USERNAME = "superadmin"
 _SUPERADMIN_DEFAULT_PW = "Admin@1234"
 
+
 def _ensure_superadmin():
-    """Create the default superadmin account if no superadmin exists yet."""
     with get_connection() as conn:
         row = conn.execute(
             "SELECT id FROM users WHERE role = 'superadmin'"
@@ -229,19 +293,18 @@ def _ensure_superadmin():
             return
         pw_hash, salt = _hash_password(_SUPERADMIN_DEFAULT_PW)
         try:
-            conn.execute("""
+            conn.execute(_p("""
                 INSERT INTO users
                     (name, username, email, password_hash, salt, default_target, role)
                 VALUES (?, ?, ?, ?, ?, ?, ?)
-            """, ("Super Admin", _SUPERADMIN_USERNAME,
-                  "superadmin@calorietracker.local",
-                  pw_hash, salt, 2000, "superadmin"))
-            conn.commit()
+            """), ("Super Admin", _SUPERADMIN_USERNAME,
+                   "superadmin@calorietracker.local",
+                   pw_hash, salt, 2000, "superadmin"))
         except Exception:
-            pass  # already exists (race condition / re-run)
+            pass
 
 
-# ─── Password helpers ─────────────────────────────────────────────────────────
+# ── Password helpers ───────────────────────────────────────────────────────────
 
 def _hash_password(password: str) -> tuple[str, str]:
     salt = secrets.token_hex(16)
@@ -254,7 +317,7 @@ def _verify_password(password: str, stored_hash: str, salt: str) -> bool:
     return secrets.compare_digest(key.hex(), stored_hash)
 
 
-# ─── User auth ────────────────────────────────────────────────────────────────
+# ── User auth ──────────────────────────────────────────────────────────────────
 
 def register_user(name: str, username: str, email: str,
                   password: str, default_target: int = 2000,
@@ -262,35 +325,41 @@ def register_user(name: str, username: str, email: str,
                   height_cm: float | None = None, sex: str | None = None,
                   activity_level: str | None = None,
                   calorie_need: int | None = None) -> tuple[bool, str]:
-    """Returns (success, message)."""
     pw_hash, salt = _hash_password(password)
     try:
         with get_connection() as conn:
-            conn.execute("""
+            conn.execute(_p("""
                 INSERT INTO users
                     (name, username, email, password_hash, salt, default_target,
                      age, weight_kg, height_cm, sex, activity_level, calorie_need)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """, (name.strip(), username.strip(), email.strip().lower(),
-                  pw_hash, salt, default_target,
-                  age, weight_kg, height_cm, sex, activity_level, calorie_need))
-            conn.commit()
+            """), (name.strip(), username.strip(), email.strip().lower(),
+                   pw_hash, salt, default_target,
+                   age, weight_kg, height_cm, sex, activity_level, calorie_need))
         return True, "Account created successfully."
-    except sqlite3.IntegrityError as e:
-        if "username" in str(e).lower():
+    except Exception as e:
+        err = str(e).lower()
+        if "username" in err:
             return False, "Username already taken. Please choose another."
-        if "email" in str(e).lower():
+        if "email" in err:
             return False, "An account with this email already exists."
         return False, "Registration failed. Please try again."
 
 
 def verify_user(username: str, password: str) -> dict | None:
-    """Returns user dict on success, None on failure."""
     with get_connection() as conn:
-        row = conn.execute("""
-            SELECT id, name, username, email, password_hash, salt, default_target, role
-            FROM users WHERE username = ?
-        """, (username.strip(),)).fetchone()
+        if _USE_PG:
+            row = conn.execute(
+                "SELECT id, name, username, email, password_hash, salt, default_target, role "
+                "FROM users WHERE LOWER(username) = LOWER(%s)",
+                (username.strip(),)
+            ).fetchone()
+        else:
+            row = conn.execute(
+                "SELECT id, name, username, email, password_hash, salt, default_target, role "
+                "FROM users WHERE username = ?",
+                (username.strip(),)
+            ).fetchone()
     if row and _verify_password(password, row[4], row[5]):
         return {
             "id": row[0], "name": row[1], "username": row[2],
@@ -301,10 +370,10 @@ def verify_user(username: str, password: str) -> dict | None:
 
 def get_user_by_id(user_id: int) -> dict | None:
     with get_connection() as conn:
-        row = conn.execute("""
+        row = conn.execute(_p("""
             SELECT id, name, username, email, default_target, role
             FROM users WHERE id = ?
-        """, (user_id,)).fetchone()
+        """), (user_id,)).fetchone()
     if row:
         return {"id": row[0], "name": row[1], "username": row[2],
                 "email": row[3], "default_target": row[4], "role": row[5]}
@@ -313,49 +382,45 @@ def get_user_by_id(user_id: int) -> dict | None:
 
 def update_default_target(user_id: int, target: int):
     with get_connection() as conn:
-        conn.execute("UPDATE users SET default_target = ? WHERE id = ?", (target, user_id))
-        conn.commit()
+        conn.execute(_p("UPDATE users SET default_target = ? WHERE id = ?"), (target, user_id))
 
 
 def update_password(user_id: int, new_password: str) -> bool:
     pw_hash, salt = _hash_password(new_password)
     with get_connection() as conn:
-        conn.execute(
-            "UPDATE users SET password_hash = ?, salt = ? WHERE id = ?",
+        conn.execute(_p(
+            "UPDATE users SET password_hash = ?, salt = ? WHERE id = ?"),
             (pw_hash, salt, user_id)
         )
-        conn.commit()
     return True
 
 
-# ─── Daily Settings ───────────────────────────────────────────────────────────
+# ── Daily Settings ─────────────────────────────────────────────────────────────
 
 def set_daily_target(user_id: int, target_date: str, target: int):
     with get_connection() as conn:
-        conn.execute("""
+        conn.execute(_p("""
             INSERT INTO daily_settings (user_id, date, calorie_target)
             VALUES (?, ?, ?)
             ON CONFLICT(user_id, date) DO UPDATE SET calorie_target = excluded.calorie_target
-        """, (user_id, target_date, target))
-        conn.commit()
+        """), (user_id, target_date, target))
 
 
 def get_daily_target(user_id: int, target_date: str) -> int:
     with get_connection() as conn:
-        row = conn.execute(
-            "SELECT calorie_target FROM daily_settings WHERE user_id = ? AND date = ?",
+        row = conn.execute(_p(
+            "SELECT calorie_target FROM daily_settings WHERE user_id = ? AND date = ?"),
             (user_id, target_date)
         ).fetchone()
         if row:
             return row[0]
-        # Fall back to the user's default target
-        default = conn.execute(
-            "SELECT default_target FROM users WHERE id = ?", (user_id,)
+        default = conn.execute(_p(
+            "SELECT default_target FROM users WHERE id = ?"), (user_id,)
         ).fetchone()
     return default[0] if default else 2000
 
 
-# ─── Food Log ─────────────────────────────────────────────────────────────────
+# ── Food Log ───────────────────────────────────────────────────────────────────
 
 def add_food_entry(user_id: int, log_date: str, meal_period: str,
                    food_name: str, quantity: float, unit: str,
@@ -365,52 +430,47 @@ def add_food_entry(user_id: int, log_date: str, meal_period: str,
                    fat_per_unit: float = 0.0) -> float:
     total = round(quantity * calories_per_unit, 1)
     with get_connection() as conn:
-        conn.execute("""
+        conn.execute(_p("""
             INSERT INTO food_log
                 (user_id, date, meal_period, food_name, quantity, unit,
                  calories_per_unit, total_calories, protein, carbs, fat)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """, (user_id, log_date, meal_period, food_name,
-              quantity, unit, calories_per_unit, total,
-              round(quantity * protein_per_unit, 1),
-              round(quantity * carbs_per_unit, 1),
-              round(quantity * fat_per_unit, 1)))
-        conn.commit()
+        """), (user_id, log_date, meal_period, food_name,
+               quantity, unit, calories_per_unit, total,
+               round(quantity * protein_per_unit, 1),
+               round(quantity * carbs_per_unit, 1),
+               round(quantity * fat_per_unit, 1)))
     return total
 
 
 def delete_food_entry(entry_id: int, user_id: int):
-    """Delete only if it belongs to this user."""
     with get_connection() as conn:
-        conn.execute(
-            "DELETE FROM food_log WHERE id = ? AND user_id = ?",
+        conn.execute(_p(
+            "DELETE FROM food_log WHERE id = ? AND user_id = ?"),
             (entry_id, user_id)
         )
-        conn.commit()
 
 
 def update_food_entry(entry_id: int, user_id: int,
                       new_quantity: float, new_meal_period: str):
-    """Update quantity and meal period; recalculate totals from stored per-unit values."""
     with get_connection() as conn:
-        row = conn.execute(
+        row = conn.execute(_p(
             "SELECT quantity, calories_per_unit, protein, carbs, fat "
-            "FROM food_log WHERE id = ? AND user_id = ?",
+            "FROM food_log WHERE id = ? AND user_id = ?"),
             (entry_id, user_id)
         ).fetchone()
         if not row:
             return
         old_qty, cal_per_unit, old_protein, old_carbs, old_fat = row
-        # Derive per-unit macros from currently stored totals
         ppu = old_protein / old_qty if old_qty else 0.0
         cpu = old_carbs   / old_qty if old_qty else 0.0
         fpu = old_fat     / old_qty if old_qty else 0.0
-        conn.execute("""
+        conn.execute(_p("""
             UPDATE food_log
             SET quantity=?, meal_period=?,
                 total_calories=?, protein=?, carbs=?, fat=?
             WHERE id=? AND user_id=?
-        """, (
+        """), (
             new_quantity, new_meal_period,
             round(new_quantity * cal_per_unit, 1),
             round(new_quantity * ppu, 1),
@@ -418,19 +478,18 @@ def update_food_entry(entry_id: int, user_id: int,
             round(new_quantity * fpu, 1),
             entry_id, user_id,
         ))
-        conn.commit()
 
 
 def get_food_log(user_id: int, log_date: str) -> list[dict]:
     with get_connection() as conn:
-        rows = conn.execute("""
+        rows = conn.execute(_p("""
             SELECT id, meal_period, food_name, quantity, unit,
                    calories_per_unit, total_calories,
                    COALESCE(protein, 0), COALESCE(carbs, 0), COALESCE(fat, 0)
             FROM food_log
             WHERE user_id = ? AND date = ?
             ORDER BY id
-        """, (user_id, log_date)).fetchall()
+        """), (user_id, log_date)).fetchall()
     return [
         {
             "id": r[0], "meal_period": r[1], "food_name": r[2],
@@ -443,9 +502,8 @@ def get_food_log(user_id: int, log_date: str) -> list[dict]:
 
 
 def get_meal_totals(user_id: int, log_date: str) -> dict:
-    """Returns {meal_period: {calories, protein, carbs, fat}}."""
     with get_connection() as conn:
-        rows = conn.execute("""
+        rows = conn.execute(_p("""
             SELECT meal_period,
                    SUM(total_calories),
                    SUM(COALESCE(protein, 0)),
@@ -454,7 +512,7 @@ def get_meal_totals(user_id: int, log_date: str) -> dict:
             FROM food_log
             WHERE user_id = ? AND date = ?
             GROUP BY meal_period
-        """, (user_id, log_date)).fetchall()
+        """), (user_id, log_date)).fetchall()
     return {
         r[0]: {
             "calories": round(r[1], 1),
@@ -468,32 +526,33 @@ def get_meal_totals(user_id: int, log_date: str) -> dict:
 
 def get_daily_total(user_id: int, log_date: str) -> float:
     with get_connection() as conn:
-        row = conn.execute("""
+        row = conn.execute(_p("""
             SELECT COALESCE(SUM(total_calories), 0)
             FROM food_log WHERE user_id = ? AND date = ?
-        """, (user_id, log_date)).fetchone()
+        """), (user_id, log_date)).fetchone()
     return round(row[0], 1)
 
 
 def get_weekly_summary(user_id: int, reference_date: str) -> list[dict]:
     """Return per-day totals for the 7 days ending on reference_date."""
+    ref = datetime.strptime(reference_date, "%Y-%m-%d").date()
+    start_date = (ref - timedelta(days=6)).isoformat()
     with get_connection() as conn:
-        rows = conn.execute("""
+        rows = conn.execute(_p("""
             SELECT date, SUM(total_calories) AS total
             FROM food_log
             WHERE user_id = ?
               AND date <= ?
-              AND date >= DATE(?, '-6 days')
+              AND date >= ?
             GROUP BY date
             ORDER BY date
-        """, (user_id, reference_date, reference_date)).fetchall()
-    return [{"date": r[0], "total": round(r[1], 1)} for r in rows]
+        """), (user_id, reference_date, start_date)).fetchall()
+    return [{"date": str(r[0]), "total": round(r[1], 1)} for r in rows]
 
 
-# ─── Admin queries (superadmin only) ──────────────────────────────────────────
+# ── Admin queries ──────────────────────────────────────────────────────────────
 
 def get_all_users() -> list[dict]:
-    """Return all registered users (excluding password data)."""
     with get_connection() as conn:
         rows = conn.execute("""
             SELECT id, name, username, email, role, default_target,
@@ -515,16 +574,15 @@ def get_all_users() -> list[dict]:
 
 
 def get_admin_food_log(limit: int = 1000) -> list[dict]:
-    """Return recent food log entries across all users with username."""
     with get_connection() as conn:
-        rows = conn.execute("""
+        rows = conn.execute(_p("""
             SELECT f.id, u.name, u.username, f.date, f.meal_period,
                    f.food_name, f.quantity, f.unit, f.total_calories
             FROM food_log f
             JOIN users u ON u.id = f.user_id
             ORDER BY f.date DESC, f.id DESC
             LIMIT ?
-        """, (limit,)).fetchall()
+        """), (limit,)).fetchall()
     return [
         {
             "id": r[0], "name": r[1], "username": r[2], "date": r[3],
