@@ -4,9 +4,15 @@ import hashlib
 import secrets
 from datetime import date
 
-_DATA_DIR = os.path.join(os.path.expanduser("~"), ".calorie_tracker_data")
-os.makedirs(_DATA_DIR, exist_ok=True)
-DB_PATH = os.path.join(_DATA_DIR, "calorie_tracker.db")
+# If DB_PATH env var is set (e.g. Railway volume mount), use it directly.
+# Otherwise fall back to ~/.calorie_tracker_data/ for local development.
+if os.environ.get("DB_PATH"):
+    DB_PATH = os.environ["DB_PATH"]
+    os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
+else:
+    _DATA_DIR = os.path.join(os.path.expanduser("~"), ".calorie_tracker_data")
+    os.makedirs(_DATA_DIR, exist_ok=True)
+    DB_PATH = os.path.join(_DATA_DIR, "calorie_tracker.db")
 
 # Schema version: bump when tables change incompatibly
 SCHEMA_VERSION = 7
