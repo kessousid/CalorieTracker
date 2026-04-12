@@ -1430,6 +1430,14 @@ MACROS = {
     "Fast&Up Protein Bar - Chocolate":                    (20.0, 20.0,  6.0),
 
     # ── BRANDED OATS ──────────────────────────────────────────────────────
+    # Yogabar High Protein Oats 26g (protein/carbs/fat per 75g serving)
+    "Yogabar High Protein Oats - Chocolate & Almonds":   (26.0, 42.0,  8.0),
+    "Yogabar High Protein Oats - Peanut Butter":         (26.0, 40.0, 10.0),
+    "Yogabar High Protein Oats - Banana & Almonds":      (26.0, 43.0,  7.0),
+    "Yogabar High Protein Oats - Vanilla & Almonds":     (26.0, 42.0,  7.5),
+    "Yogabar High Protein Oats - Strawberry & Almonds":  (26.0, 41.0,  7.0),
+    "Yogabar High Protein Oats - Apple & Cinnamon":      (26.0, 42.0,  7.0),
+    "Yogabar High Protein Oats - Mango & Almonds":       (26.0, 42.0,  7.0),
     "Yogabar Oats - Chikmagalur Kappe (Dark Roast)":     (5.0,  27.0,  3.0),
     "Yogabar Oats - Classic Rolled Oats":                (5.0,  27.0,  3.0),
     "Yogabar Muesli - Fruits & Nuts":                    (5.0,  34.0,  4.0),

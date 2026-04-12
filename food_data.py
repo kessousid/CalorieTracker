@@ -1473,6 +1473,15 @@ FOOD_DATABASE = {
     # ═══════════════════════════════════════════════════════════════════════
     # BRANDED OATS (YOGABAR & OTHERS)
     # ═══════════════════════════════════════════════════════════════════════
+    # Yogabar High Protein Oats 26g (per 75g serving)
+    "Yogabar High Protein Oats - Chocolate & Almonds":  {"calories": 352, "unit": "serving (75g)", "category": "Branded Oats"},
+    "Yogabar High Protein Oats - Peanut Butter":        {"calories": 358, "unit": "serving (75g)", "category": "Branded Oats"},
+    "Yogabar High Protein Oats - Banana & Almonds":     {"calories": 345, "unit": "serving (75g)", "category": "Branded Oats"},
+    "Yogabar High Protein Oats - Vanilla & Almonds":    {"calories": 348, "unit": "serving (75g)", "category": "Branded Oats"},
+    "Yogabar High Protein Oats - Strawberry & Almonds": {"calories": 342, "unit": "serving (75g)", "category": "Branded Oats"},
+    "Yogabar High Protein Oats - Apple & Cinnamon":     {"calories": 344, "unit": "serving (75g)", "category": "Branded Oats"},
+    "Yogabar High Protein Oats - Mango & Almonds":      {"calories": 346, "unit": "serving (75g)", "category": "Branded Oats"},
+
     # Yogabar Oats (per serving ~40g dry unless noted)
     "Yogabar Oats - Chikmagalur Kappe (Dark Roast)":    {"calories": 155, "unit": "serving (40g dry)", "category": "Branded Oats"},
     "Yogabar Oats - Classic Rolled Oats":               {"calories": 148, "unit": "serving (40g dry)", "category": "Branded Oats"},
