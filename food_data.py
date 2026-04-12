@@ -1383,6 +1383,25 @@ FOOD_DATABASE = {
     "Pohe (Maha Poha with lemon)":   {"calories": 250, "unit": "cup",           "category": "Regional - West India"},
 
     # ═══════════════════════════════════════════════════════════════════════
+    # KARNATAKA SAGU & ADDITIONAL DISHES
+    # ═══════════════════════════════════════════════════════════════════════
+    "Vegetable Sagu (Karnataka)":   {"calories": 180, "unit": "cup",           "category": "Regional - South India"},
+    "Sagu (with Idli/Dosa)":        {"calories": 190, "unit": "cup",           "category": "Regional - South India"},
+    "Set Dosa with Sagu":           {"calories": 420, "unit": "plate (3 dosas + sagu)", "category": "Regional - South India"},
+    "Poori with Sagu":              {"calories": 480, "unit": "plate (2 pooris + sagu)", "category": "Regional - South India"},
+    "Chapati with Sagu":            {"calories": 320, "unit": "plate (2 chapati + sagu)", "category": "Regional - South India"},
+    "Aloo Sagu":                    {"calories": 200, "unit": "cup",           "category": "Regional - South India"},
+    "Set Dosa (plain)":             {"calories": 220, "unit": "plate (3 small dosas)", "category": "Regional - South India"},
+    "Neer Dosa":                    {"calories": 110, "unit": "piece",         "category": "Regional - South India"},
+    "Akki Otti (Rice Roti KA)":     {"calories": 170, "unit": "piece",         "category": "Regional - South India"},
+    "Mandakki Bhath (Puffed Rice Bath)": {"calories": 230, "unit": "cup",     "category": "Regional - South India"},
+    "Bisi Bele Bath":               {"calories": 310, "unit": "cup",           "category": "Regional - South India"},
+    "Nuchinunde (Dal Steamed Dumpling)": {"calories": 120, "unit": "3 pieces", "category": "Regional - South India"},
+    "Uddina Vade (Urad Dal Vada KA)": {"calories": 150, "unit": "piece",       "category": "Regional - South India"},
+    "Kodubale":                     {"calories": 180, "unit": "cup (10 pieces)", "category": "Regional - South India"},
+    "Nippattu":                     {"calories": 200, "unit": "cup (8 pieces)", "category": "Regional - South India"},
+
+    # ═══════════════════════════════════════════════════════════════════════
     # VEGETABLE CURRIES — KARNATAKA PALYAS & ADDITIONAL
     # ═══════════════════════════════════════════════════════════════════════
     "Cabbage Palya (Karnataka)":     {"calories": 90,  "unit": "cup",           "category": "Vegetable Curries"},
@@ -1423,6 +1442,74 @@ FOOD_DATABASE = {
     "Soya Kabab":                    {"calories": 180, "unit": "2 pieces",      "category": "Soya Dishes"},
     "Soya Mutter Masala":            {"calories": 230, "unit": "cup",           "category": "Soya Dishes"},
     "Soya Bhurji":                   {"calories": 190, "unit": "cup",           "category": "Soya Dishes"},
+
+    # ═══════════════════════════════════════════════════════════════════════
+    # BRANDED PROTEIN BARS
+    # ═══════════════════════════════════════════════════════════════════════
+    # Yogabar Protein Bars
+    "Yogabar Power Up 20g Protein Bar - Choco Almond":   {"calories": 210, "unit": "bar (60g)",  "category": "Protein Bars"},
+    "Yogabar Power Up 20g Protein Bar - Double Chocolate":{"calories": 215, "unit": "bar (60g)", "category": "Protein Bars"},
+    "Yogabar Power Up 20g Protein Bar - Peanut Butter":  {"calories": 220, "unit": "bar (60g)",  "category": "Protein Bars"},
+    "Yogabar Power Up 20g Protein Bar - Salted Caramel": {"calories": 205, "unit": "bar (60g)",  "category": "Protein Bars"},
+    "Yogabar Power Up 20g Protein Bar - Vanilla Almond": {"calories": 208, "unit": "bar (60g)",  "category": "Protein Bars"},
+    "Yogabar Everyday Protein Bar - Choco Fudge":        {"calories": 185, "unit": "bar (50g)",  "category": "Protein Bars"},
+    "Yogabar Everyday Protein Bar - Peanut Butter Choco":{"calories": 190, "unit": "bar (50g)",  "category": "Protein Bars"},
+    "Yogabar Muesli Bar - Choco Almond":                 {"calories": 160, "unit": "bar (40g)",  "category": "Protein Bars"},
+    "Yogabar Muesli Bar - Cranberry Almond":             {"calories": 155, "unit": "bar (40g)",  "category": "Protein Bars"},
+    "Yogabar Protein Bar - Dark Choco":                  {"calories": 200, "unit": "bar (55g)",  "category": "Protein Bars"},
+    # RiteBite Max Protein Bars
+    "RiteBite Max Protein Bar - Peanut Butter":          {"calories": 185, "unit": "bar (67g)",  "category": "Protein Bars"},
+    "RiteBite Max Protein Bar - Choco Slim":             {"calories": 190, "unit": "bar (67g)",  "category": "Protein Bars"},
+    "RiteBite Max Protein Bar - Green Tea":              {"calories": 175, "unit": "bar (67g)",  "category": "Protein Bars"},
+    "RiteBite Max Protein Bar - Choco Almond":           {"calories": 188, "unit": "bar (67g)",  "category": "Protein Bars"},
+    # MuscleBlaze Protein Bars
+    "MuscleBlaze Protein Bar - Choco Fudge":             {"calories": 210, "unit": "bar (58g)",  "category": "Protein Bars"},
+    "MuscleBlaze Protein Bar - Peanut Butter":           {"calories": 215, "unit": "bar (58g)",  "category": "Protein Bars"},
+    # Quest / Other Bars
+    "Mojo Bar - Almond Dark Chocolate":                  {"calories": 165, "unit": "bar (40g)",  "category": "Protein Bars"},
+    "Mojo Bar - Peanut Butter":                          {"calories": 170, "unit": "bar (40g)",  "category": "Protein Bars"},
+    "Fast&Up Protein Bar - Chocolate":                   {"calories": 195, "unit": "bar (55g)",  "category": "Protein Bars"},
+
+    # ═══════════════════════════════════════════════════════════════════════
+    # BRANDED OATS (YOGABAR & OTHERS)
+    # ═══════════════════════════════════════════════════════════════════════
+    # Yogabar Oats (per serving ~40g dry unless noted)
+    "Yogabar Oats - Chikmagalur Kappe (Dark Roast)":    {"calories": 155, "unit": "serving (40g dry)", "category": "Branded Oats"},
+    "Yogabar Oats - Classic Rolled Oats":               {"calories": 148, "unit": "serving (40g dry)", "category": "Branded Oats"},
+    "Yogabar Muesli - Fruits & Nuts":                   {"calories": 180, "unit": "serving (45g dry)", "category": "Branded Oats"},
+    "Yogabar Muesli - Dark Chocolate":                  {"calories": 185, "unit": "serving (45g dry)", "category": "Branded Oats"},
+    "Yogabar Muesli - Blueberry & Almonds":             {"calories": 178, "unit": "serving (45g dry)", "category": "Branded Oats"},
+    "Yogabar Granola - Honey & Almond":                 {"calories": 200, "unit": "serving (45g)",     "category": "Branded Oats"},
+    "Yogabar Granola - Dark Choco Quinoa":              {"calories": 205, "unit": "serving (45g)",     "category": "Branded Oats"},
+    "Yogabar Granola - Mixed Berries":                  {"calories": 195, "unit": "serving (45g)",     "category": "Branded Oats"},
+    # Other Branded Oats
+    "Quaker Oats (plain)":                              {"calories": 150, "unit": "serving (40g dry)", "category": "Branded Oats"},
+    "Saffola Oats (plain)":                             {"calories": 148, "unit": "serving (40g dry)", "category": "Branded Oats"},
+    "True Elements Rolled Oats":                        {"calories": 148, "unit": "serving (40g dry)", "category": "Branded Oats"},
+
+    # ═══════════════════════════════════════════════════════════════════════
+    # PROTEIN & SUPERFOOD POWDERS
+    # ═══════════════════════════════════════════════════════════════════════
+    # Cosmix Superfood Powders (per serving ~5-10g scoop)
+    "Cosmix Plant Protein - Chocolate":                 {"calories": 110, "unit": "scoop (30g)",  "category": "Protein Powders"},
+    "Cosmix Plant Protein - Vanilla":                   {"calories": 108, "unit": "scoop (30g)",  "category": "Protein Powders"},
+    "Cosmix Plant Protein - Unflavoured":               {"calories": 105, "unit": "scoop (30g)",  "category": "Protein Powders"},
+    "Cosmix The Gut Fix":                               {"calories": 35,  "unit": "scoop (7g)",   "category": "Protein Powders"},
+    "Cosmix Thyroid Support":                           {"calories": 30,  "unit": "scoop (6g)",   "category": "Protein Powders"},
+    "Cosmix The Hormone Balance":                       {"calories": 30,  "unit": "scoop (6g)",   "category": "Protein Powders"},
+    "Cosmix The Stress Soother":                        {"calories": 25,  "unit": "scoop (5g)",   "category": "Protein Powders"},
+    "Cosmix The Energy Fix":                            {"calories": 30,  "unit": "scoop (6g)",   "category": "Protein Powders"},
+    "Cosmix The Beauty Fix":                            {"calories": 25,  "unit": "scoop (5g)",   "category": "Protein Powders"},
+    "Cosmix Super Greens":                              {"calories": 40,  "unit": "scoop (8g)",   "category": "Protein Powders"},
+    # Other Protein Powders
+    "Oziva Protein & Herbs (per scoop)":                {"calories": 120, "unit": "scoop (33g)",  "category": "Protein Powders"},
+    "Oziva Superfood Women - Chocolate":                {"calories": 115, "unit": "scoop (30g)",  "category": "Protein Powders"},
+    "Onelife Pea Protein":                              {"calories": 110, "unit": "scoop (30g)",  "category": "Protein Powders"},
+    "Ritebite Max Protein Powder - Choco":              {"calories": 130, "unit": "scoop (35g)",  "category": "Protein Powders"},
+    "Nakpro Gold Whey Protein - Chocolate":             {"calories": 125, "unit": "scoop (33g)",  "category": "Protein Powders"},
+    "MuscleBlaze Whey Protein - Chocolate":             {"calories": 126, "unit": "scoop (33g)",  "category": "Protein Powders"},
+    "Whey Protein (generic, 1 scoop)":                  {"calories": 120, "unit": "scoop (30g)",  "category": "Protein Powders"},
+    "Pea Protein Powder (generic)":                     {"calories": 100, "unit": "scoop (30g)",  "category": "Protein Powders"},
 
     # ═══════════════════════════════════════════════════════════════════════
     # AIR-FRIED DISHES

@@ -550,6 +550,34 @@ def get_weekly_summary(user_id: int, reference_date: str) -> list[dict]:
     return [{"date": str(r[0]), "total": round(r[1], 1)} for r in rows]
 
 
+def get_macro_trend(user_id: int, reference_date: str, days: int = 30) -> list[dict]:
+    """Return per-day protein/carbs/fat totals for the last `days` days ending on reference_date."""
+    ref = datetime.strptime(reference_date, "%Y-%m-%d").date()
+    start_date = (ref - timedelta(days=days - 1)).isoformat()
+    with get_connection() as conn:
+        rows = conn.execute(_p("""
+            SELECT date,
+                   SUM(total_protein) AS protein,
+                   SUM(total_carbs)   AS carbs,
+                   SUM(total_fat)     AS fat
+            FROM food_log
+            WHERE user_id = ?
+              AND date <= ?
+              AND date >= ?
+            GROUP BY date
+            ORDER BY date
+        """), (user_id, reference_date, start_date)).fetchall()
+    return [
+        {
+            "date":    str(r[0]),
+            "protein": round(r[1] or 0, 1),
+            "carbs":   round(r[2] or 0, 1),
+            "fat":     round(r[3] or 0, 1),
+        }
+        for r in rows
+    ]
+
+
 # ── Admin queries ──────────────────────────────────────────────────────────────
 
 def get_all_users() -> list[dict]:

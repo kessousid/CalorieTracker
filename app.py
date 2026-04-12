@@ -465,7 +465,7 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-tab1, tab2 = st.tabs(["  📊  Today's Breakdown  ", "  📈  Weekly Trend  "])
+tab1, tab2, tab3 = st.tabs(["  📊  Today's Breakdown  ", "  📈  Weekly Trend  ", "  💪  Macro Trend  "])
 
 with tab1:
     ch1, ch2 = st.columns(2)
@@ -582,6 +582,125 @@ with tab2:
         yaxis=dict(gridcolor="#F1F5F9"),
     )
     st.plotly_chart(fig_week, use_container_width=True, config={"displayModeBar": False})
+
+with tab3:
+    # ── Macro Trend: protein / carbs / fat over time ──────────────────────
+    trend_range = st.radio(
+        "Range", ["7 days", "14 days", "30 days"],
+        index=1, horizontal=True, key="macro_trend_range"
+    )
+    trend_days = int(trend_range.split()[0])
+
+    macro_trend = db.get_macro_trend(user_id, date_str, days=trend_days)
+
+    if macro_trend:
+        trend_dates   = [d["date"] for d in macro_trend]
+        trend_protein = [d["protein"] for d in macro_trend]
+        trend_carbs   = [d["carbs"]   for d in macro_trend]
+        trend_fat     = [d["fat"]     for d in macro_trend]
+
+        # ── Line chart: protein / carbs / fat ────────────────────────────
+        fig_trend = go.Figure()
+        fig_trend.add_trace(go.Scatter(
+            x=trend_dates, y=trend_protein,
+            mode="lines+markers", name="Protein",
+            line=dict(color="#10B981", width=2),
+            marker=dict(size=5, color="#10B981"),
+            hovertemplate="%{x}<br>Protein: %{y}g<extra></extra>",
+        ))
+        fig_trend.add_trace(go.Scatter(
+            x=trend_dates, y=trend_carbs,
+            mode="lines+markers", name="Carbs",
+            line=dict(color="#F59E0B", width=2),
+            marker=dict(size=5, color="#F59E0B"),
+            hovertemplate="%{x}<br>Carbs: %{y}g<extra></extra>",
+        ))
+        fig_trend.add_trace(go.Scatter(
+            x=trend_dates, y=trend_fat,
+            mode="lines+markers", name="Fat",
+            line=dict(color="#EF4444", width=2),
+            marker=dict(size=5, color="#EF4444"),
+            hovertemplate="%{x}<br>Fat: %{y}g<extra></extra>",
+        ))
+        fig_trend.update_layout(
+            xaxis_title="Date", yaxis_title="Grams (g)",
+            height=340,
+            legend=dict(orientation="h", yanchor="bottom", y=1.02, font=dict(family="Inter")),
+            margin=dict(t=30, b=30, l=20, r=20),
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="rgba(0,0,0,0)",
+            font=dict(family="Inter"),
+            yaxis=dict(gridcolor="#F1F5F9"),
+            hovermode="x unified",
+        )
+        st.plotly_chart(fig_trend, use_container_width=True, config={"displayModeBar": False})
+
+        # ── Averages summary row ──────────────────────────────────────────
+        n = len(macro_trend)
+        avg_p = round(sum(trend_protein) / n, 1)
+        avg_c = round(sum(trend_carbs)   / n, 1)
+        avg_f = round(sum(trend_fat)     / n, 1)
+        st.markdown(
+            f"""
+            <div style="display:flex;gap:1rem;margin-top:0.5rem;">
+              <div style="flex:1;background:#F0FDF4;border-radius:10px;padding:0.75rem 1rem;text-align:center;">
+                <div style="font-size:0.75rem;color:#6B7280;">Avg Protein / day</div>
+                <div style="font-size:1.4rem;font-weight:700;color:#10B981;">{avg_p}g</div>
+              </div>
+              <div style="flex:1;background:#FFFBEB;border-radius:10px;padding:0.75rem 1rem;text-align:center;">
+                <div style="font-size:0.75rem;color:#6B7280;">Avg Carbs / day</div>
+                <div style="font-size:1.4rem;font-weight:700;color:#F59E0B;">{avg_c}g</div>
+              </div>
+              <div style="flex:1;background:#FFF1F2;border-radius:10px;padding:0.75rem 1rem;text-align:center;">
+                <div style="font-size:0.75rem;color:#6B7280;">Avg Fat / day</div>
+                <div style="font-size:1.4rem;font-weight:700;color:#EF4444;">{avg_f}g</div>
+              </div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+        # ── Stacked area chart: macro composition per day ─────────────────
+        st.markdown(
+            '<p style="font-size:0.85rem;font-weight:600;color:#475569;margin:1.25rem 0 0.5rem;">Macro Composition per Day</p>',
+            unsafe_allow_html=True,
+        )
+        fig_area = go.Figure()
+        fig_area.add_trace(go.Bar(
+            x=trend_dates, y=trend_protein,
+            name="Protein", marker_color="#10B981",
+            hovertemplate="%{x}<br>Protein: %{y}g<extra></extra>",
+        ))
+        fig_area.add_trace(go.Bar(
+            x=trend_dates, y=trend_carbs,
+            name="Carbs", marker_color="#F59E0B",
+            hovertemplate="%{x}<br>Carbs: %{y}g<extra></extra>",
+        ))
+        fig_area.add_trace(go.Bar(
+            x=trend_dates, y=trend_fat,
+            name="Fat", marker_color="#EF4444",
+            hovertemplate="%{x}<br>Fat: %{y}g<extra></extra>",
+        ))
+        fig_area.update_layout(
+            barmode="stack",
+            xaxis_title="Date", yaxis_title="Grams (g)",
+            height=300,
+            legend=dict(orientation="h", yanchor="bottom", y=1.02, font=dict(family="Inter")),
+            margin=dict(t=30, b=30, l=20, r=20),
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="rgba(0,0,0,0)",
+            font=dict(family="Inter"),
+            yaxis=dict(gridcolor="#F1F5F9"),
+            hovermode="x unified",
+        )
+        st.plotly_chart(fig_area, use_container_width=True, config={"displayModeBar": False})
+    else:
+        st.markdown("""
+        <div class="empty-state" style="padding:2rem 1rem;">
+            <div class="es-icon">💪</div>
+            <p class="es-sub">No data yet — log some meals to see your macro trend</p>
+        </div>
+        """, unsafe_allow_html=True)
 
 # ─── 6. Food Reference Table & Footer ────────────────────────────────────────
 with st.expander(f"📖 Food Calorie Reference Table ({len(FOOD_DATABASE)} items)"):
