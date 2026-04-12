@@ -557,9 +557,9 @@ def get_macro_trend(user_id: int, reference_date: str, days: int = 30) -> list[d
     with get_connection() as conn:
         rows = conn.execute(_p("""
             SELECT date,
-                   SUM(total_protein) AS protein,
-                   SUM(total_carbs)   AS carbs,
-                   SUM(total_fat)     AS fat
+                   SUM(COALESCE(protein, 0)) AS protein,
+                   SUM(COALESCE(carbs,   0)) AS carbs,
+                   SUM(COALESCE(fat,     0)) AS fat
             FROM food_log
             WHERE user_id = ?
               AND date <= ?
