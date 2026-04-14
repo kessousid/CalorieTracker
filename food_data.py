@@ -1501,9 +1501,12 @@ FOOD_DATABASE = {
     # PROTEIN & SUPERFOOD POWDERS
     # ═══════════════════════════════════════════════════════════════════════
     # Cosmix Superfood Powders (per serving ~5-10g scoop)
-    "Cosmix Plant Protein - Chocolate":                 {"calories": 110, "unit": "scoop (30g)",  "category": "Protein Powders"},
-    "Cosmix Plant Protein - Vanilla":                   {"calories": 108, "unit": "scoop (30g)",  "category": "Protein Powders"},
-    "Cosmix Plant Protein - Unflavoured":               {"calories": 105, "unit": "scoop (30g)",  "category": "Protein Powders"},
+    # No Nonsense Plant Protein — all flavors
+    "Cosmix No Nonsense Plant Protein - Chocolate":     {"calories": 110, "unit": "scoop (30g)",  "category": "Protein Powders"},
+    "Cosmix No Nonsense Plant Protein - Vanilla":       {"calories": 108, "unit": "scoop (30g)",  "category": "Protein Powders"},
+    "Cosmix No Nonsense Plant Protein - Unflavoured":   {"calories": 105, "unit": "scoop (30g)",  "category": "Protein Powders"},
+    "Cosmix No Nonsense Plant Protein - Chikmagalur Mocha": {"calories": 110, "unit": "scoop (30g)", "category": "Protein Powders"},
+    "Cosmix No Nonsense Plant Protein - Strawberry":    {"calories": 108, "unit": "scoop (30g)",  "category": "Protein Powders"},
     "Cosmix The Gut Fix":                               {"calories": 35,  "unit": "scoop (7g)",   "category": "Protein Powders"},
     "Cosmix Thyroid Support":                           {"calories": 30,  "unit": "scoop (6g)",   "category": "Protein Powders"},
     "Cosmix The Hormone Balance":                       {"calories": 30,  "unit": "scoop (6g)",   "category": "Protein Powders"},
@@ -1511,6 +1514,11 @@ FOOD_DATABASE = {
     "Cosmix The Energy Fix":                            {"calories": 30,  "unit": "scoop (6g)",   "category": "Protein Powders"},
     "Cosmix The Beauty Fix":                            {"calories": 25,  "unit": "scoop (5g)",   "category": "Protein Powders"},
     "Cosmix Super Greens":                              {"calories": 40,  "unit": "scoop (8g)",   "category": "Protein Powders"},
+    "Cosmix The Immunity Fix":                          {"calories": 25,  "unit": "scoop (5g)",  "category": "Protein Powders"},
+    "Cosmix The Focus Fix":                             {"calories": 25,  "unit": "scoop (5g)",  "category": "Protein Powders"},
+    "Cosmix The Sleep Fix":                             {"calories": 20,  "unit": "scoop (5g)",  "category": "Protein Powders"},
+    "Cosmix The Happy Gut":                             {"calories": 30,  "unit": "scoop (6g)",  "category": "Protein Powders"},
+    "Cosmix The Detox Fix":                             {"calories": 25,  "unit": "scoop (5g)",  "category": "Protein Powders"},
     # Other Protein Powders
     "Oziva Protein & Herbs (per scoop)":                {"calories": 120, "unit": "scoop (33g)",  "category": "Protein Powders"},
     "Oziva Superfood Women - Chocolate":                {"calories": 115, "unit": "scoop (30g)",  "category": "Protein Powders"},
