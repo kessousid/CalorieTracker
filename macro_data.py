@@ -1452,9 +1452,12 @@ MACROS = {
     "True Elements Rolled Oats":                         (5.0,  27.0,  2.5),
 
     # ── PROTEIN & SUPERFOOD POWDERS ───────────────────────────────────────
-    "Cosmix Plant Protein - Chocolate":                  (21.0,  8.0,  2.0),
-    "Cosmix Plant Protein - Vanilla":                    (21.0,  8.0,  1.5),
-    "Cosmix Plant Protein - Unflavoured":                (22.0,  4.0,  2.0),
+    # No Nonsense Plant Protein — all flavors (per 30g scoop)
+    "Cosmix No Nonsense Plant Protein - Chocolate":      (21.0,  8.0,  2.0),
+    "Cosmix No Nonsense Plant Protein - Vanilla":        (21.0,  8.0,  1.5),
+    "Cosmix No Nonsense Plant Protein - Unflavoured":    (22.0,  4.0,  2.0),
+    "Cosmix No Nonsense Plant Protein - Chikmagalur Mocha": (20.0, 7.0, 2.0),
+    "Cosmix No Nonsense Plant Protein - Strawberry":     (20.0,  8.0,  1.5),
     "Cosmix The Gut Fix":                                (1.0,   6.0,  0.5),
     "Cosmix Thyroid Support":                            (1.0,   5.0,  0.5),
     "Cosmix The Hormone Balance":                        (1.0,   5.0,  0.5),
@@ -1462,6 +1465,11 @@ MACROS = {
     "Cosmix The Energy Fix":                             (1.0,   5.0,  0.5),
     "Cosmix The Beauty Fix":                             (1.0,   4.0,  0.5),
     "Cosmix Super Greens":                               (2.0,   6.0,  1.0),
+    "Cosmix The Immunity Fix":                           (1.0,   4.0,  0.5),
+    "Cosmix The Focus Fix":                              (1.0,   4.0,  0.5),
+    "Cosmix The Sleep Fix":                              (1.0,   3.0,  0.3),
+    "Cosmix The Happy Gut":                              (1.0,   5.0,  0.5),
+    "Cosmix The Detox Fix":                              (1.0,   4.0,  0.5),
     "Oziva Protein & Herbs (per scoop)":                 (23.0,  5.0,  2.0),
     "Oziva Superfood Women - Chocolate":                 (20.0,  8.0,  2.0),
     "Onelife Pea Protein":                               (24.0,  3.0,  1.5),
