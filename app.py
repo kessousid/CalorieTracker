@@ -333,8 +333,8 @@ with st.expander("➕ Add Food Entry", expanded=True):
 
             # Show concerns if any
             if health_analysis["concerns"]:
-                concerns_html = get_concerns_html(health_analysis["concerns"])
-                st.markdown(concerns_html, unsafe_allow_html=True)
+                concerns_md = get_concerns_html(health_analysis["concerns"])
+                st.markdown(concerns_md)
 
     qty_col, info_col, btn_col = st.columns([1, 2, 1])
     with qty_col:

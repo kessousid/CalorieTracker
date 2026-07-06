@@ -193,27 +193,21 @@ def get_health_badge_html(health_status: str, score: int = None) -> str:
     """
 
 def get_concerns_html(concerns: list) -> str:
-    """Generate HTML for concern list."""
+    """Generate markdown for concern list."""
     if not concerns:
         return ""
 
-    severity_colors = {
-        "high": "#EF4444",
-        "medium": "#F59E0B",
-        "low": "#3B82F6",
+    severity_emoji = {
+        "high": "🚫",
+        "medium": "🟡",
+        "low": "ℹ️",
     }
 
-    html = '<div style="margin-top:0.5rem;font-size:0.8rem;">'
+    markdown = "\n**Concerns Found:**\n"
     for c in concerns:
-        color = severity_colors.get(c["severity"], "#94A3B8")
-        html += f"""
-        <div style="
-            background:{color}10;border-left:3px solid {color};
-            padding:0.4rem 0.6rem;margin-bottom:0.3rem;border-radius:4px;
-            color:#1F2937;
-        ">
-            <strong>{c['additive']}</strong> — {c['concern']}
-        </div>
-        """
-    html += '</div>'
-    return html
+        emoji = severity_emoji.get(c["severity"], "•")
+        sev = c["severity"].upper()
+        markdown += f"\n{emoji} **{c['additive']}** ({sev})\n"
+        markdown += f"> {c['concern']}\n"
+
+    return markdown
