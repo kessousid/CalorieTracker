@@ -1578,3 +1578,9 @@ def get_food_info(food_name: str) -> dict:
     info = FOOD_DATABASE.get(food_name, {}).copy()
     info.update(get_macros(food_name))
     return info
+
+def get_health_analysis(food_name: str) -> dict:
+    """Get health analysis for a food including ingredients and concerns."""
+    from ingredient_analyzer import analyze_health, get_ingredients
+    ingredients = get_ingredients(food_name)
+    return analyze_health(food_name, ingredients)

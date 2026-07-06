@@ -1,0 +1,417 @@
+{
+  "Idli": {
+    "ingredients": ["urad dal", "rice", "salt", "water"],
+    "category": "Breakfast",
+    "notes": "Steamed cake - no additives"
+  },
+  "Dosa (Plain)": {
+    "ingredients": ["urad dal", "rice", "salt", "water", "oil"],
+    "category": "Breakfast",
+    "notes": "Traditional fermented batter"
+  },
+  "Masala Dosa": {
+    "ingredients": ["urad dal", "rice", "potato", "onion", "salt", "oil", "mustard seeds", "curry leaves", "asafoetida"],
+    "category": "Breakfast",
+    "notes": "With potato filling"
+  },
+  "Poha": {
+    "ingredients": ["flattened rice", "peanuts", "potato", "onion", "mustard seeds", "curry leaves", "turmeric", "salt", "oil"],
+    "category": "Breakfast",
+    "notes": "Traditional light breakfast"
+  },
+  "Upma": {
+    "ingredients": ["semolina", "vegetables", "mustard seeds", "curry leaves", "salt", "oil"],
+    "category": "Breakfast",
+    "notes": "Savory semolina dish"
+  },
+  "Paratha (Plain)": {
+    "ingredients": ["wheat flour", "salt", "water", "ghee"],
+    "category": "Breakfast",
+    "notes": "Layered bread"
+  },
+  "Aloo Paratha": {
+    "ingredients": ["wheat flour", "potato", "onion", "salt", "ghee", "cumin"],
+    "category": "Breakfast",
+    "notes": "Potato-filled paratha"
+  },
+  "Cornflakes with Milk": {
+    "ingredients": ["corn flour", "sugar", "added sugar", "salt", "milk"],
+    "category": "Breakfast",
+    "notes": "Often has added sugars and additives"
+  },
+  "Muesli with Milk": {
+    "ingredients": ["oats", "dried fruit", "nuts", "sugar", "honey", "milk"],
+    "category": "Breakfast",
+    "notes": "Check for added sugar"
+  },
+  "Bread (White)": {
+    "ingredients": ["refined wheat flour", "salt", "yeast", "water", "sugar"],
+    "category": "Breakfast",
+    "notes": "Often contains additives for preservation"
+  },
+  "Bread (Brown/Whole Wheat)": {
+    "ingredients": ["whole wheat flour", "salt", "yeast", "water"],
+    "category": "Breakfast",
+    "notes": "Better option than white bread"
+  },
+  "Egg (Boiled)": {
+    "ingredients": ["egg", "salt"],
+    "category": "Breakfast",
+    "notes": "Clean ingredient"
+  },
+  "Egg (Fried)": {
+    "ingredients": ["egg", "oil", "salt"],
+    "category": "Breakfast",
+    "notes": "Simple preparation"
+  },
+  "Omelette (2 eggs)": {
+    "ingredients": ["egg", "milk", "salt", "butter"],
+    "category": "Breakfast",
+    "notes": "Fresh ingredients"
+  },
+  "Oats Porridge": {
+    "ingredients": ["oats", "milk", "salt", "sugar"],
+    "category": "Breakfast",
+    "notes": "Whole grain, good option"
+  },
+  "Tea (with milk & sugar)": {
+    "ingredients": ["tea leaves", "milk", "sugar", "water"],
+    "category": "Beverage",
+    "notes": "Added sugar"
+  },
+  "Masala Chai": {
+    "ingredients": ["tea leaves", "milk", "sugar", "ginger", "cardamom", "cloves", "cinnamon", "water"],
+    "category": "Beverage",
+    "notes": "Spiced tea with added sugar"
+  },
+  "Filter Coffee": {
+    "ingredients": ["coffee powder", "milk", "sugar", "water"],
+    "category": "Beverage",
+    "notes": "Added sugar"
+  },
+  "Black Tea": {
+    "ingredients": ["tea leaves", "water"],
+    "category": "Beverage",
+    "notes": "No additives"
+  },
+  "Black Coffee": {
+    "ingredients": ["coffee powder", "water"],
+    "category": "Beverage",
+    "notes": "No additives"
+  },
+  "Green Tea (plain)": {
+    "ingredients": ["green tea leaves", "water"],
+    "category": "Beverage",
+    "notes": "Healthy option"
+  },
+  "Milk (Full Fat)": {
+    "ingredients": ["milk"],
+    "category": "Beverage",
+    "notes": "Natural - no added ingredients"
+  },
+  "Almond Milk": {
+    "ingredients": ["almonds", "water", "salt"],
+    "category": "Beverage",
+    "notes": "May have added stabilizers"
+  },
+  "Flavored Milk (Amul Kool)": {
+    "ingredients": ["milk", "sugar", "added sugar", "cocoa", "artificial flavor", "stabilizers"],
+    "category": "Beverage",
+    "notes": "High added sugar, artificial ingredients"
+  },
+  "Lassi (Sweet)": {
+    "ingredients": ["yogurt", "sugar", "water"],
+    "category": "Beverage",
+    "notes": "Added sugar"
+  },
+  "Buttermilk (Chaas)": {
+    "ingredients": ["yogurt", "salt", "cumin", "water"],
+    "category": "Beverage",
+    "notes": "Natural and healthy"
+  },
+  "Fresh Orange Juice": {
+    "ingredients": ["orange"],
+    "category": "Beverage",
+    "notes": "Natural sugars"
+  },
+  "Packaged Fruit Juice (Tropicana)": {
+    "ingredients": ["fruit concentrate", "added sugar", "preservatives", "added color"],
+    "category": "Beverage",
+    "notes": "High added sugar, additives"
+  },
+  "Cola (Pepsi / Coke) 350ml": {
+    "ingredients": ["carbonated water", "added sugar", "artificial sweetener", "caramel coloring", "phosphoric acid", "artificial flavor"],
+    "category": "Beverage",
+    "notes": "High sugar or artificial sweeteners, questionable additives"
+  },
+  "Steamed Rice": {
+    "ingredients": ["rice", "salt", "water"],
+    "category": "Rice & Grains",
+    "notes": "Simple whole grain"
+  },
+  "Brown Rice": {
+    "ingredients": ["brown rice", "salt", "water"],
+    "category": "Rice & Grains",
+    "notes": "Whole grain - better than white rice"
+  },
+  "Jeera Rice": {
+    "ingredients": ["rice", "cumin", "ghee", "salt"],
+    "category": "Rice & Grains",
+    "notes": "Flavored with spices"
+  },
+  "Veg Pulao": {
+    "ingredients": ["rice", "vegetables", "ghee", "spices", "salt"],
+    "category": "Rice & Grains",
+    "notes": "Mixed with vegetables"
+  },
+  "Veg Biryani": {
+    "ingredients": ["basmati rice", "vegetables", "yogurt", "ghee", "spices", "salt"],
+    "category": "Rice & Grains",
+    "notes": "Rice with vegetables and spices"
+  },
+  "Roti / Chapati": {
+    "ingredients": ["wheat flour", "salt", "water", "oil"],
+    "category": "Breads",
+    "notes": "Traditional Indian bread"
+  },
+  "Whole Wheat Roti": {
+    "ingredients": ["whole wheat flour", "salt", "water", "oil"],
+    "category": "Breads",
+    "notes": "Better option - whole grain"
+  },
+  "Naan": {
+    "ingredients": ["wheat flour", "yogurt", "salt", "yeast", "oil"],
+    "category": "Breads",
+    "notes": "Leavened bread"
+  },
+  "Garlic Naan": {
+    "ingredients": ["wheat flour", "yogurt", "salt", "yeast", "oil", "garlic"],
+    "category": "Breads",
+    "notes": "With garlic"
+  },
+  "Puri": {
+    "ingredients": ["wheat flour", "salt", "water", "oil"],
+    "category": "Breads",
+    "notes": "Deep fried"
+  },
+  "Dal Tadka (Toor Dal)": {
+    "ingredients": ["toor dal", "turmeric", "salt", "asafoetida", "cumin", "mustard seeds", "curry leaves", "oil"],
+    "category": "Dal & Lentils",
+    "notes": "Whole lentils - protein rich"
+  },
+  "Dal Makhani": {
+    "ingredients": ["urad dal", "kidney beans", "cream", "butter", "tomato", "ginger", "garlic", "salt", "spices"],
+    "category": "Dal & Lentils",
+    "notes": "Creamy dal - high fat"
+  },
+  "Moong Dal": {
+    "ingredients": ["moong dal", "turmeric", "salt", "asafoetida", "oil"],
+    "category": "Dal & Lentils",
+    "notes": "Light and digestible"
+  },
+  "Masoor Dal": {
+    "ingredients": ["masoor dal", "turmeric", "salt", "asafoetida", "oil"],
+    "category": "Dal & Lentils",
+    "notes": "Red lentils - quick cooking"
+  },
+  "Chana Masala": {
+    "ingredients": ["chickpeas", "tomato", "onion", "ginger", "garlic", "spices", "salt", "oil"],
+    "category": "Dal & Lentils",
+    "notes": "Protein rich"
+  },
+  "Rajma": {
+    "ingredients": ["kidney beans", "tomato", "onion", "ginger", "garlic", "spices", "salt", "oil"],
+    "category": "Dal & Lentils",
+    "notes": "Legume based"
+  },
+  "Sambar": {
+    "ingredients": ["toor dal", "vegetables", "tamarind", "salt", "asafoetida", "mustard seeds", "fenugreek", "oil"],
+    "category": "Dal & Lentils",
+    "notes": "South Indian lentil stew"
+  },
+  "Rasam": {
+    "ingredients": ["tamarind", "tomato", "pepper", "cumin", "salt", "asafoetida", "water"],
+    "category": "Dal & Lentils",
+    "notes": "Light spiced broth"
+  },
+  "Aloo Sabzi": {
+    "ingredients": ["potato", "onion", "tomato", "ginger", "garlic", "spices", "salt", "oil"],
+    "category": "Vegetable Curries",
+    "notes": "Potato curry"
+  },
+  "Aloo Gobi": {
+    "ingredients": ["potato", "cauliflower", "onion", "tomato", "ginger", "garlic", "turmeric", "salt", "oil"],
+    "category": "Vegetable Curries",
+    "notes": "Mixed vegetable curry"
+  },
+  "Palak Curry": {
+    "ingredients": ["spinach", "onion", "tomato", "ginger", "garlic", "salt", "oil"],
+    "category": "Vegetable Curries",
+    "notes": "Leafy greens"
+  },
+  "Mixed Vegetable Curry": {
+    "ingredients": ["assorted vegetables", "onion", "tomato", "spices", "salt", "oil"],
+    "category": "Vegetable Curries",
+    "notes": "Seasonal vegetables"
+  },
+  "Paneer Butter Masala": {
+    "ingredients": ["paneer", "butter", "cream", "tomato", "onion", "ginger", "garlic", "spices", "salt"],
+    "category": "Paneer & Dairy",
+    "notes": "Rich and creamy"
+  },
+  "Palak Paneer": {
+    "ingredients": ["paneer", "spinach", "onion", "ginger", "garlic", "salt", "oil", "cream"],
+    "category": "Paneer & Dairy",
+    "notes": "Paneer with spinach"
+  },
+  "Paneer (raw)": {
+    "ingredients": ["milk", "salt"],
+    "category": "Paneer & Dairy",
+    "notes": "Fresh cheese - clean"
+  },
+  "Curd / Dahi": {
+    "ingredients": ["milk", "yogurt culture"],
+    "category": "Paneer & Dairy",
+    "notes": "Fermented milk - probiotic"
+  },
+  "Greek Yogurt (plain)": {
+    "ingredients": ["milk", "yogurt culture"],
+    "category": "Paneer & Dairy",
+    "notes": "Strained yogurt - protein rich"
+  },
+  "Flavored Yogurt (fruit)": {
+    "ingredients": ["milk", "yogurt culture", "added sugar", "fruit concentrate", "artificial flavor"],
+    "category": "Paneer & Dairy",
+    "notes": "High added sugar"
+  },
+  "Cheese Slice": {
+    "ingredients": ["milk", "salt", "emulsifiers", "preservatives", "artificial color"],
+    "category": "Paneer & Dairy",
+    "notes": "Processed - many additives"
+  },
+  "Egg Curry": {
+    "ingredients": ["egg", "tomato", "onion", "ginger", "garlic", "spices", "salt", "oil"],
+    "category": "Egg Dishes",
+    "notes": "Spiced egg curry"
+  },
+  "Egg Masala": {
+    "ingredients": ["egg", "tomato", "onion", "cream", "ginger", "garlic", "spices", "salt", "oil"],
+    "category": "Egg Dishes",
+    "notes": "Creamy egg curry"
+  },
+  "Samosa": {
+    "ingredients": ["wheat flour", "potato", "peas", "onion", "spices", "salt", "oil"],
+    "category": "Snacks",
+    "notes": "Deep fried pastry"
+  },
+  "Kachori": {
+    "ingredients": ["wheat flour", "lentil filling", "spices", "salt", "oil"],
+    "category": "Snacks",
+    "notes": "Deep fried pastry"
+  },
+  "Bhel Puri": {
+    "ingredients": ["puffed rice", "sev", "potato", "onion", "tamarind chutney", "salt"],
+    "category": "Snacks",
+    "notes": "Street food mix"
+  },
+  "Pav Bhaji": {
+    "ingredients": ["pav (bread)", "bhaji (vegetable curry)", "butter", "salt", "spices"],
+    "category": "Snacks",
+    "notes": "High butter content"
+  },
+  "Vada Pav": {
+    "ingredients": ["potato", "gram flour", "bread", "oil"],
+    "category": "Snacks",
+    "notes": "Deep fried"
+  },
+  "Dhokla": {
+    "ingredients": ["gram flour", "rice flour", "yogurt", "salt", "ginger", "green chili", "oil"],
+    "category": "Snacks",
+    "notes": "Steamed cake - healthier"
+  },
+  "Maggi Noodles (1 pack cooked)": {
+    "ingredients": ["wheat flour", "palm oil", "salt", "added sugar", "artificial flavor", "MSG", "emulsifiers", "preservatives"],
+    "category": "Modern & Fast Food",
+    "notes": "High MSG and additives - NOT RECOMMENDED"
+  },
+  "Hakka Noodles (Veg)": {
+    "ingredients": ["wheat noodles", "vegetables", "soy sauce", "oil", "garlic", "salt"],
+    "category": "Modern & Fast Food",
+    "notes": "With vegetables"
+  },
+  "Veg Pizza (1 slice)": {
+    "ingredients": ["wheat flour", "tomato sauce", "cheese", "vegetables", "oil", "salt"],
+    "category": "Modern & Fast Food",
+    "notes": "Processed cheese, refined flour"
+  },
+  "Veg Burger": {
+    "ingredients": ["bread bun", "vegetable patty", "lettuce", "tomato", "sauce", "oil"],
+    "category": "Modern & Fast Food",
+    "notes": "Check sauce for sugar/additives"
+  },
+  "Chocolate Cake (slice)": {
+    "ingredients": ["wheat flour", "sugar", "cocoa", "eggs", "butter", "milk", "baking powder", "vanilla"],
+    "category": "Bakery",
+    "notes": "High sugar"
+  },
+  "Plain Cake (slice)": {
+    "ingredients": ["wheat flour", "sugar", "eggs", "butter", "milk", "baking powder"],
+    "category": "Bakery",
+    "notes": "High sugar"
+  },
+  "Muffin (Chocolate)": {
+    "ingredients": ["wheat flour", "sugar", "cocoa", "eggs", "butter", "milk", "baking powder", "added sugar"],
+    "category": "Bakery",
+    "notes": "High sugar, refined flour"
+  },
+  "Donut / Doughnut": {
+    "ingredients": ["wheat flour", "sugar", "eggs", "milk", "oil", "baking powder", "added sugar"],
+    "category": "Bakery",
+    "notes": "Deep fried, very high sugar"
+  },
+  "Marie Biscuit": {
+    "ingredients": ["wheat flour", "sugar", "salt", "oil", "dextrose"],
+    "category": "Bakery",
+    "notes": "Refined, some sugar"
+  },
+  "Dairy Milk (small 45g)": {
+    "ingredients": ["cocoa mass", "sugar", "cocoa butter", "milk solids", "added sugar", "artificial flavor", "emulsifiers"],
+    "category": "Bakery",
+    "notes": "High sugar and additives"
+  },
+  "Ragi Mudde": {
+    "ingredients": ["ragi flour", "water", "salt"],
+    "category": "Millets & Ancient Grains",
+    "notes": "Finger millet - nutritious whole grain"
+  },
+  "Ragi Porridge": {
+    "ingredients": ["ragi flour", "milk", "salt", "sugar"],
+    "category": "Millets & Ancient Grains",
+    "notes": "Whole grain porridge"
+  },
+  "Quinoa (cooked)": {
+    "ingredients": ["quinoa", "salt", "water"],
+    "category": "Millets & Ancient Grains",
+    "notes": "Complete protein grain"
+  },
+  "Cosmix No Nonsense Plant Protein": {
+    "ingredients": ["whey protein isolate", "maltodextrin", "natural flavors", "sucralose", "lecithin", "salt"],
+    "category": "Beverage",
+    "notes": "Artificial sweetener, high GI carbs"
+  },
+  "Yogabar High Protein Oats": {
+    "ingredients": ["oats", "almonds", "seeds", "natural sweeteners"],
+    "category": "Breakfast",
+    "notes": "Check for added sugars"
+  },
+  "Horlicks with Milk": {
+    "ingredients": ["milk", "horlicks malt powder", "sugar", "added sugar", "vitamins", "minerals"],
+    "category": "Beverage",
+    "notes": "Malted drink - added sugar"
+  },
+  "Bournvita with Milk": {
+    "ingredients": ["milk", "bournvita powder", "sugar", "added sugar", "cocoa", "vitamins"],
+    "category": "Beverage",
+    "notes": "Chocolate drink - high sugar"
+  }
+}

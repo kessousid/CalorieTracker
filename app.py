@@ -8,8 +8,9 @@ from auth import show_auth_page, show_sidebar_user
 from styles import inject_css
 from food_data import (
     FOOD_DATABASE, MEAL_PERIODS, CATEGORIES,
-    get_foods_by_category, get_food_info, get_all_food_names,
+    get_foods_by_category, get_food_info, get_all_food_names, get_health_analysis,
 )
+from ingredient_analyzer import get_health_badge_html, get_concerns_html
 
 # ─── Page Config ──────────────────────────────────────────────────────────────
 st.set_page_config(
@@ -311,6 +312,29 @@ with st.expander("➕ Add Food Entry", expanded=True):
         fat_per_unit     = food_info.get("fat", 0.0)
         unit             = food_info.get("unit", "serving")
         food_name_to_log = selected_food
+
+        # Health analysis for selected food
+        health_analysis = get_health_analysis(selected_food)
+        if health_analysis["health_status"] != "gray":
+            st.markdown("<br>", unsafe_allow_html=True)
+            health_col, rec_col = st.columns([1, 3])
+            with health_col:
+                badge_html = get_health_badge_html(
+                    health_analysis["health_status"],
+                    health_analysis["score"]
+                )
+                st.markdown(badge_html, unsafe_allow_html=True)
+            with rec_col:
+                st.markdown(
+                    f'<p style="font-size:0.85rem;color:#475569;margin:0;">'
+                    f'{health_analysis["recommendation"]}</p>',
+                    unsafe_allow_html=True
+                )
+
+            # Show concerns if any
+            if health_analysis["concerns"]:
+                concerns_html = get_concerns_html(health_analysis["concerns"])
+                st.markdown(concerns_html, unsafe_allow_html=True)
 
     qty_col, info_col, btn_col = st.columns([1, 2, 1])
     with qty_col:
